@@ -13,7 +13,7 @@ import Chatbot from './Chatbot';
 import ProjectDetailsModal from './projects/ProjectDetailsModal';
 import SuggestProjectModal from './projects/SuggestProjectModal';
 import { useLocation } from 'react-router-dom';
-import Masonry from 'react-masonry-css';
+
 
 interface Project {
   id: string;
@@ -303,14 +303,10 @@ const Projects: React.FC = () => {
 
     return (
       <motion.div
-        className="project-masonry-card"
+        className="project-grid-card"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        whileHover={{
-          y: -5, // Reduced hover lift
-          transition: { duration: 0.3, ease: "easeOut" }
-        }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4 }}
       >
         <div className="project-card-content">
           <div className="project-top-content">
@@ -448,13 +444,6 @@ const Projects: React.FC = () => {
     );
   };
 
-  // Add these breakpoints for the Masonry grid
-  const breakpointColumnsObj = {
-    default: 3,
-    1400: 2,
-    900: 2,
-    600: 1
-  };
 
   return (
     <div className={isDarkMode ? 'dark-mode' : 'light-mode'}>
@@ -499,17 +488,13 @@ const Projects: React.FC = () => {
           </motion.p>
         </motion.section>
 
-        {/* Project Masonry Section */}
-        <section className="projects-masonry-section">
-          <Masonry
-            breakpointCols={breakpointColumnsObj}
-            className="projects-masonry-grid"
-            columnClassName="projects-masonry-grid_column"
-          >
+        {/* Project Grid Section */}
+        <section className="projects-grid-section">
+          <div className="projects-grid">
             {projects.map((project) => (
               <ProjectCard key={project.id} project={project} />
             ))}
-          </Masonry>
+          </div>
         </section>
 
         <ProjectBenefits />

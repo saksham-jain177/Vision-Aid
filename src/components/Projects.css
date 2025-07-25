@@ -65,14 +65,14 @@ body, html {
 }
 
 .header-container {
-  max-width: 1200px; /* Max width for content */
+  width: 100%; /* Full width so logo sticks to viewport edge */
   margin: 0 auto; /* Center the container */
   padding: 1rem 1rem 1rem 0; /* Padding around content */
   display: flex;
   justify-content: space-between; /* Space logo and nav items */
   align-items: center; /* Vertically align items */
   gap: 2rem; /* Gap between header items */
-  margin-right: 10px;
+  margin-right: 0;
 }
 .nav-link {
   color: var(--text-primary); /* Use theme color instead of white */
@@ -85,8 +85,8 @@ body, html {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-left: -75px;
-  padding-left: 1rem;
+  margin-left: 0;
+  padding-left: 0;
 }
 
 .logo-icon {
@@ -340,21 +340,22 @@ body, html {
 }
 
 /* Masonry Grid Layout */
-.projects-masonry-section {
+.projects-grid-section {
   padding: 2rem;
   max-width: 1800px;
   margin: 0 auto;
 }
 
-.projects-masonry-grid {
-  display: flex;
-  margin-left: -30px;
-  width: auto;
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
 }
 
-.projects-masonry-grid_column {
-  padding-left: 30px;
-  background-clip: padding-box;
+@media (max-width: 900px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .project-masonry-card {

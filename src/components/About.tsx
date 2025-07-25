@@ -4,6 +4,7 @@ import { FaUsers, FaLightbulb, FaHandHoldingHeart, FaEye, FaGithub, FaLinkedin, 
 import { Link } from 'react-router-dom';
 import { Globe, Sun, Moon, ArrowRight } from 'lucide-react';
 import './About.css';
+import './ImpactSection.css';
 import Chatbot from './Chatbot';
 import { useLocation } from 'react-router-dom';
 
@@ -355,47 +356,36 @@ const About: React.FC = () => {
           </div>
         </section>
 
-        {/* Team Section */}
-        <section className="team-section">
-          <h2 className="team-title">Meet Our Team</h2>
-          <div className="team-grid">
+        {/* Impact Section */}
+        <section className="impact-section">
+          <h2 className="impact-title">Our Impact</h2>
+          <p className="impact-description">
+            Through cutting-edge computer vision and AI solutions, VisionAid is reshaping the way cities manage traffic, security, and accessibility.
+          </p>
+          <div className="impact-grid">
             <motion.div 
-              className="team-member"
+              className="impact-card"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              <div className="member-avatar"></div>
-              <h3>Arnav Nath</h3>
-              <p>Full Stack Developer</p>
-            </motion.div>
-
-            <motion.div 
-              className="team-member"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <div className="member-avatar"></div>
-              <h3>Saksham Jain</h3>
-              <p>AI Engineer</p>
-            </motion.div>
-
-            <motion.div 
-              className="team-member"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <div className="member-avatar"></div>
-              <h3>Aryan Sansi</h3>
-              <p>AI Specialist</p>
+              <h3>10+ Cities</h3>
+              <p>Pilots and deployments across urban centres</p>
             </motion.div>
             <motion.div 
-              className="team-member"
+              className="impact-card"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              <div className="member-avatar"></div>
-              <h3>Varghese</h3>
-              <p>Research Analyst</p>
+              <h3>98% Accuracy</h3>
+              <p>In detecting traffic violations and hazards</p>
+            </motion.div>
+            <motion.div 
+              className="impact-card"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <h3>24/7 Monitoring</h3>
+              <p>Real-time insights for safer streets</p>
             </motion.div>
           </div>
         </section>
