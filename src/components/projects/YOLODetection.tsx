@@ -1,391 +1,369 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { createVehicleTracker, VehicleTrack, SpeedViolation } from '../../services/vehicleTracking';
+import { X, Upload, Camera, Video, Play, Pause, RotateCcw, Image as ImageIcon } from 'lucide-react';
 import './YOLODetection.css';
+
+interface YOLODetectionProps {
+  onClose: () => void;
+}
 
 interface Detection {
   id: string;
   class: string;
   confidence: number;
-  bbox: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  timestamp: number;
-  speed?: number; // Speed in km/h
-  direction?: 'north' | 'south' | 'east' | 'west';
-  trackId?: string; // For vehicle tracking
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
-interface YOLODetectionProps {
-  isActive: boolean;
-  onDetectionUpdate: (detections: Detection[]) => void;
-}
-
-const YOLODetection: React.FC<YOLODetectionProps> = ({ isActive, onDetectionUpdate }) => {
+/**
+ * YOLO Detection Component
+ * Allows users to upload images/videos for real-time object detection
+ */
+const YOLODetection: React.FC<YOLODetectionProps> = ({ onClose }) => {
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
+  const [mediaUrl, setMediaUrl] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [detections, setDetections] = useState<Detection[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [modelLoaded, setModelLoaded] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [detectionStats, setDetectionStats] = useState({
-    totalDetections: 0,
-    vehiclesDetected: 0,
-    pedestriansDetected: 0,
-    averageConfidence: 0,
-    averageSpeed: 0,
-    speedViolations: 0,
-  });
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const [vehicleTracker, setVehicleTracker] = useState<any>(null);
-  const [vehicleTracks, setVehicleTracks] = useState<VehicleTrack[]>([]);
-  const [speedViolations, setSpeedViolations] = useState<SpeedViolation[]>([]);
-  const [trackingStats, setTrackingStats] = useState({
-    totalTracks: 0,
-    activeTracks: 0,
-    averageSpeed: 0,
-    speedViolations: 0,
-    vehicleCounts: {} as { [key: string]: number }
-  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const detectionRef = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<number>();
+  /**
+   * Handle file selection
+   */
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  // Initialize vehicle tracker
-  useEffect(() => {
-    if (!vehicleTracker) {
-      const tracker = createVehicleTracker();
-      setVehicleTracker(tracker);
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+
+    if (!isImage && !isVideo) {
+      alert('Please select an image or video file');
+      return;
     }
-  }, [vehicleTracker]);
 
-  // Enhanced YOLO detection with real-time vehicle tracking
-  const simulateYOLODetection = () => {
-    if (!isActive || !modelLoaded) return;
+    setMediaFile(file);
+    setMediaType(isImage ? 'image' : 'video');
+    setMediaUrl(URL.createObjectURL(file));
+    setDetections([]);
+  };
 
-    const vehicleClasses = ['car', 'truck', 'bus', 'motorcycle', 'bicycle'];
-    const pedestrianClasses = ['person', 'pedestrian'];
-    const allClasses = [...vehicleClasses, ...pedestrianClasses];
+  /**
+   * Simulate YOLO detection (placeholder for actual YOLO implementation)
+   */
+  const simulateDetection = () => {
+    setIsProcessing(true);
 
-    const newDetections: Detection[] = [];
-    
-    // Simulate realistic detection patterns based on traffic flow
-    const baseDetectionCount = Math.floor(Math.random() * 6) + 1; // 1-7 detections
-    const timeOfDay = new Date().getHours();
-    const trafficMultiplier = timeOfDay >= 7 && timeOfDay <= 9 ? 1.5 : 
-                             timeOfDay >= 17 && timeOfDay <= 19 ? 1.3 : 0.8;
-    
-    const numDetections = Math.floor(baseDetectionCount * trafficMultiplier);
-
-    for (let i = 0; i < numDetections; i++) {
-      const detectedClass = allClasses[Math.floor(Math.random() * allClasses.length)];
-      const confidence = 0.7 + Math.random() * 0.3; // 0.7-1.0 confidence (improved)
-      
-      // More realistic bounding box positioning
-      const lane = Math.floor(Math.random() * 4); // 4 lanes
-      const x = 50 + lane * 80 + Math.random() * 60;
-      const y = 50 + Math.random() * 300;
-      
-      // Vehicle-specific sizing
-      const getVehicleSize = (vehicleType: string) => {
-        switch (vehicleType) {
-          case 'truck': return { width: 35 + Math.random() * 15, height: 25 + Math.random() * 10 };
-          case 'bus': return { width: 40 + Math.random() * 10, height: 30 + Math.random() * 5 };
-          case 'motorcycle': return { width: 15 + Math.random() * 10, height: 20 + Math.random() * 5 };
-          case 'bicycle': return { width: 12 + Math.random() * 8, height: 18 + Math.random() * 5 };
-          default: return { width: 20 + Math.random() * 20, height: 15 + Math.random() * 15 };
-        }
-      };
-      
-      const size = getVehicleSize(detectedClass);
-      
-      // Calculate speed and direction for vehicles
-      let speed = 0;
-      let direction: 'north' | 'south' | 'east' | 'west' = 'north';
-      let trackId = `track-${detectedClass}-${i}`;
-
-      if (vehicleClasses.includes(detectedClass)) {
-        // Simple speed estimation based on movement
-        speed = 20 + Math.random() * 40; // 20-60 km/h
-        
-        // Determine direction based on position
-        if (y < 100) direction = 'north';
-        else if (y > 250) direction = 'south';
-        else if (x < 150) direction = 'west';
-        else direction = 'east';
-
-        // Check for speed violations (speed limit 50 km/h)
-        if (speed > 50) {
-          setDetectionStats(prev => ({
-            ...prev,
-            speedViolations: prev.speedViolations + 1
-          }));
-        }
-      }
-
-      newDetections.push({
-        id: `detection-${Date.now()}-${i}`,
-        class: detectedClass,
-        confidence,
-        bbox: {
-          x,
-          y,
-          width: size.width,
-          height: size.height,
+    // Simulated detection - in production, this would call actual YOLO API
+    setTimeout(() => {
+      const mockDetections: Detection[] = [
+        {
+          id: '1',
+          class: 'car',
+          confidence: 0.92,
+          x: 100,
+          y: 150,
+          width: 120,
+          height: 80
         },
-        timestamp: Date.now(),
-        speed: vehicleClasses.includes(detectedClass) ? speed : undefined,
-        direction: vehicleClasses.includes(detectedClass) ? direction : undefined,
-        trackId: vehicleClasses.includes(detectedClass) ? trackId : undefined,
-      });
+        {
+          id: '2',
+          class: 'truck',
+          confidence: 0.88,
+          x: 300,
+          y: 200,
+          width: 150,
+          height: 100
+        },
+        {
+          id: '3',
+          class: 'person',
+          confidence: 0.95,
+          x: 450,
+          y: 300,
+          width: 50,
+          height: 120
+        },
+        {
+          id: '4',
+          class: 'motorcycle',
+          confidence: 0.85,
+          x: 200,
+          y: 400,
+          width: 80,
+          height: 60
+        }
+      ];
+
+      setDetections(mockDetections);
+      setIsProcessing(false);
+      drawDetections(mockDetections);
+    }, 1500);
+  };
+
+  /**
+   * Draw detection boxes on canvas
+   */
+  const drawDetections = (dets: Detection[]) => {
+    const canvas = canvasRef.current;
+    const image = imageRef.current;
+    const video = videoRef.current;
+
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw image or video frame
+    if (mediaType === 'image' && image) {
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      ctx.drawImage(image, 0, 0);
+    } else if (mediaType === 'video' && video) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
     }
 
-    setDetections(prev => {
-      const updated = [...prev, ...newDetections].slice(-20); // Keep last 20 detections
-      onDetectionUpdate(updated);
-      return updated;
+    // Draw detection boxes
+    dets.forEach(detection => {
+      // Draw box
+      ctx.strokeStyle = getColorForClass(detection.class);
+      ctx.lineWidth = 3;
+      ctx.strokeRect(detection.x, detection.y, detection.width, detection.height);
+
+      // Draw label background
+      const label = `${detection.class} ${(detection.confidence * 100).toFixed(0)}%`;
+      ctx.font = '16px Arial';
+      const textWidth = ctx.measureText(label).width;
+      
+      ctx.fillStyle = getColorForClass(detection.class);
+      ctx.fillRect(detection.x, detection.y - 25, textWidth + 10, 25);
+
+      // Draw label text
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText(label, detection.x + 5, detection.y - 7);
     });
-
-    // Process detections with vehicle tracker
-    if (vehicleTracker) {
-      const tracks = vehicleTracker.processDetections(newDetections);
-      setVehicleTracks(tracks);
-      
-      const violations = vehicleTracker.getSpeedViolations();
-      setSpeedViolations(violations);
-      
-      const stats = vehicleTracker.getTrafficStats();
-      setTrackingStats(stats);
-    }
-
-    // Update stats with enhanced metrics
-    const vehicles = newDetections.filter(d => vehicleClasses.includes(d.class));
-    const pedestrians = newDetections.filter(d => pedestrianClasses.includes(d.class));
-    const avgConfidence = newDetections.reduce((sum, d) => sum + d.confidence, 0) / newDetections.length;
-    
-    // Calculate average speed for vehicles
-    const vehicleSpeeds = vehicles.filter(v => v.speed !== undefined).map(v => v.speed!);
-    const avgSpeed = vehicleSpeeds.length > 0 
-      ? vehicleSpeeds.reduce((sum, speed) => sum + speed, 0) / vehicleSpeeds.length 
-      : 0;
-
-    setDetectionStats(prev => ({
-      totalDetections: prev.totalDetections + newDetections.length,
-      vehiclesDetected: prev.vehiclesDetected + vehicles.length,
-      pedestriansDetected: prev.pedestriansDetected + pedestrians.length,
-      averageConfidence: avgConfidence,
-      averageSpeed: avgSpeed,
-      speedViolations: prev.speedViolations, // Already updated above
-    }));
   };
 
-  // Initialize YOLO model (simulated)
-  const initializeYOLO = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Simulate model loading
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // In real implementation, this would load the actual YOLO model
-      console.log('YOLO model loaded successfully');
-      setModelLoaded(true);
-    } catch (err) {
-      setError('Failed to load YOLO model');
-      console.error('YOLO initialization error:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Detection loop
-  useEffect(() => {
-    if (isActive && modelLoaded) {
-      const interval = setInterval(simulateYOLODetection, 1000); // Detect every second
-      return () => clearInterval(interval);
-    }
-  }, [isActive, modelLoaded]);
-
-  // Initialize model on mount
-  useEffect(() => {
-    initializeYOLO();
-  }, []);
-
-  // Clean up old detections
-  useEffect(() => {
-    const cleanup = setInterval(() => {
-      setDetections(prev => 
-        prev.filter(d => Date.now() - d.timestamp < 5000) // Remove detections older than 5 seconds
-      );
-    }, 1000);
-
-    return () => clearInterval(cleanup);
-  }, []);
-
-  const getClassColor = (className: string) => {
+  /**
+   * Get color for detection class
+   */
+  const getColorForClass = (className: string): string => {
     const colors: { [key: string]: string } = {
-      car: '#FF6B6B',
-      truck: '#4ECDC4',
-      bus: '#45B7D1',
-      motorcycle: '#96CEB4',
-      bicycle: '#FFEAA7',
-      person: '#DDA0DD',
-      pedestrian: '#DDA0DD',
+      car: '#3182ce',
+      truck: '#e53e3e',
+      bus: '#f6ad55',
+      motorcycle: '#48bb78',
+      bicycle: '#9f7aea',
+      person: '#ed8936',
+      pedestrian: '#ed8936'
     };
-    return colors[className] || '#888888';
+    return colors[className] || '#718096';
   };
 
-  const getClassIcon = (className: string) => {
-    const icons: { [key: string]: string } = {
-      car: '🚗',
-      truck: '🚛',
-      bus: '🚌',
-      motorcycle: '🏍️',
-      bicycle: '🚲',
-      person: '🚶',
-      pedestrian: '🚶',
-    };
-    return icons[className] || '❓';
+  /**
+   * Handle video play/pause
+   */
+  const togglePlayPause = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isPlaying) {
+      video.pause();
+    } else {
+      video.play();
+      // Simulate detection on each frame (in production, use actual YOLO)
+      requestAnimationFrame(processVideoFrame);
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  /**
+   * Process video frames
+   */
+  const processVideoFrame = () => {
+    if (!isPlaying || !videoRef.current) return;
+
+    simulateDetection();
+    requestAnimationFrame(processVideoFrame);
+  };
+
+  /**
+   * Reset media
+   */
+  const handleReset = () => {
+    setMediaFile(null);
+    setMediaType(null);
+    setMediaUrl(null);
+    setDetections([]);
+    setIsPlaying(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
-    <div className="yolo-detection">
-      <div className="detection-header">
-        <h3>YOLO Object Detection</h3>
-        <div className="detection-status">
-          {isLoading && <span className="status loading">Loading Model...</span>}
-          {modelLoaded && <span className="status active">Model Ready</span>}
-          {error && <span className="status error">Error: {error}</span>}
-        </div>
-      </div>
-
-      <div className="detection-content">
-        <div className="detection-canvas" ref={detectionRef}>
-          {detections.map((detection) => (
-            <motion.div
-              key={detection.id}
-              className="detection-box"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              style={{
-                left: detection.bbox.x,
-                top: detection.bbox.y,
-                width: detection.bbox.width,
-                height: detection.bbox.height,
-                borderColor: getClassColor(detection.class),
-              }}
-            >
-              <div className="detection-label">
-                <span className="detection-icon">
-                  {getClassIcon(detection.class)}
-                </span>
-                <span className="detection-class">{detection.class}</span>
-                <span className="detection-confidence">
-                  {(detection.confidence * 100).toFixed(0)}%
-                </span>
-                {detection.speed && (
-                  <span className="detection-speed">
-                    {detection.speed.toFixed(0)} km/h
-                  </span>
-                )}
-                {detection.direction && (
-                  <span className="detection-direction">
-                    {detection.direction.toUpperCase()}
-                  </span>
-                )}
-              </div>
-            </motion.div>
-          ))}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="yolo-detection-overlay"
+    >
+      <div className="yolo-detection-container">
+        {/* Header */}
+        <div className="yolo-header">
+          <h2>YOLO Object Detection</h2>
+          <button className="close-btn" onClick={onClose}>
+            <X size={24} />
+          </button>
         </div>
 
-        <div className="detection-stats">
-          <h4>Detection Statistics</h4>
-          <div className="stats-grid">
-            <div className="stat-item">
-              <span className="stat-label">Total Detections:</span>
-              <span className="stat-value">{detectionStats.totalDetections}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Vehicles:</span>
-              <span className="stat-value">{detectionStats.vehiclesDetected}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Pedestrians:</span>
-              <span className="stat-value">{detectionStats.pedestriansDetected}</span>
-            </div>
-              <div className="stat-item">
-                <span className="stat-label">Avg Confidence:</span>
-                <span className="stat-value">
-                  {(detectionStats.averageConfidence * 100).toFixed(1)}%
-                </span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-label">Avg Speed:</span>
-                <span className="stat-value">
-                  {detectionStats.averageSpeed.toFixed(1)} km/h
-                </span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-label">Speed Violations:</span>
-                <span className="stat-value" style={{ color: detectionStats.speedViolations > 0 ? '#e74c3c' : '#27ae60' }}>
-                  {detectionStats.speedViolations}
-                </span>
-              </div>
-            </div>
+        {/* Upload Area */}
+        {!mediaUrl && (
+          <div className="upload-area">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              onChange={handleFileSelect}
+              style={{ display: 'none' }}
+            />
             
-            <div className="tracking-stats">
-              <h4>Vehicle Tracking</h4>
-              <div className="stats-grid">
-                <div className="stat-item">
-                  <span className="stat-label">Active Tracks:</span>
-                  <span className="stat-value">{trackingStats.activeTracks}</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Total Tracks:</span>
-                  <span className="stat-value">{trackingStats.totalTracks}</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Avg Speed:</span>
-                  <span className="stat-value">{trackingStats.averageSpeed.toFixed(1)} km/h</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Violations:</span>
-                  <span className="stat-value" style={{ color: trackingStats.speedViolations > 0 ? '#e74c3c' : '#27ae60' }}>
-                    {trackingStats.speedViolations}
-                  </span>
-                </div>
+            <div className="upload-prompt" onClick={() => fileInputRef.current?.click()}>
+              <Upload size={64} className="upload-icon" />
+              <h3>Upload Image or Video</h3>
+              <p>Click to select a file for object detection</p>
+              <div className="file-types">
+                <span><ImageIcon size={16} /> Images: JPG, PNG, GIF</span>
+                <span><Video size={16} /> Videos: MP4, AVI, MOV</span>
               </div>
+            </div>
+
+            <div className="upload-options">
+              <button className="option-btn" onClick={() => fileInputRef.current?.click()}>
+                <Camera size={20} />
+                From Camera
+              </button>
+              <button className="option-btn" onClick={() => fileInputRef.current?.click()}>
+                <Upload size={20} />
+                From Files
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Media Display */}
+        {mediaUrl && (
+          <div className="media-container">
+            <div className="media-display">
+              <canvas
+                ref={canvasRef}
+                className="detection-canvas"
+                style={{ display: detections.length > 0 ? 'block' : 'none' }}
+              />
               
-              {Object.keys(trackingStats.vehicleCounts).length > 0 && (
-                <div className="vehicle-breakdown">
-                  <h5>Vehicle Types:</h5>
-                  <div className="vehicle-counts">
-                    {Object.entries(trackingStats.vehicleCounts).map(([type, count]) => (
-                      <span key={type} className="vehicle-count">
-                        {type}: {count}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+              {mediaType === 'image' && (
+                <img
+                  ref={imageRef}
+                  src={mediaUrl}
+                  alt="Uploaded"
+                  className="media-preview"
+                  style={{ display: detections.length === 0 ? 'block' : 'none' }}
+                  onLoad={() => {
+                    if (canvasRef.current && imageRef.current) {
+                      canvasRef.current.width = imageRef.current.naturalWidth;
+                      canvasRef.current.height = imageRef.current.naturalHeight;
+                    }
+                  }}
+                />
+              )}
+
+              {mediaType === 'video' && (
+                <video
+                  ref={videoRef}
+                  src={mediaUrl}
+                  className="media-preview"
+                  style={{ display: detections.length === 0 ? 'block' : 'none' }}
+                  onLoadedMetadata={() => {
+                    if (canvasRef.current && videoRef.current) {
+                      canvasRef.current.width = videoRef.current.videoWidth;
+                      canvasRef.current.height = videoRef.current.videoHeight;
+                    }
+                  }}
+                />
               )}
             </div>
+
+            {/* Controls */}
+            <div className="media-controls">
+              {mediaType === 'image' && (
+                <button
+                  className="control-btn primary"
+                  onClick={simulateDetection}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? 'Processing...' : 'Detect Objects'}
+                </button>
+              )}
+
+              {mediaType === 'video' && (
+                <button className="control-btn primary" onClick={togglePlayPause}>
+                  {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+                  {isPlaying ? 'Pause' : 'Play & Detect'}
+                </button>
+              )}
+
+              <button className="control-btn secondary" onClick={handleReset}>
+                <RotateCcw size={20} />
+                Reset
+              </button>
+
+              <button className="control-btn secondary" onClick={() => fileInputRef.current?.click()}>
+                <Upload size={20} />
+                New File
+              </button>
+            </div>
+
+            {/* Detection Results */}
+            {detections.length > 0 && (
+              <div className="detection-results">
+                <h3>Detected Objects ({detections.length})</h3>
+                <div className="detections-list">
+                  {detections.map(detection => (
+                    <div key={detection.id} className="detection-item">
+                      <div
+                        className="detection-color"
+                        style={{ background: getColorForClass(detection.class) }}
+                      />
+                      <span className="detection-class">{detection.class}</span>
+                      <span className="detection-confidence">
+                        {(detection.confidence * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Information */}
+        <div className="yolo-info">
+          <p><strong>Note:</strong> This is a demonstration interface. In production, this would integrate with actual YOLO models for real-time object detection on traffic images and videos.</p>
         </div>
       </div>
-
-      <div className="detection-info">
-        <h4>YOLO Integration Benefits</h4>
-        <ul>
-          <li>🎯 <strong>Real-time Detection:</strong> Identifies vehicles, pedestrians, and obstacles</li>
-          <li>📊 <strong>Accurate Classification:</strong> Distinguishes between different vehicle types</li>
-          <li>⚡ <strong>High Performance:</strong> Processes frames at 30+ FPS</li>
-          <li>🔍 <strong>Confidence Scoring:</strong> Provides reliability metrics for each detection</li>
-          <li>🚦 <strong>Traffic Optimization:</strong> Enables smarter signal timing based on real data</li>
-        </ul>
-      </div>
-    </div>
+    </motion.div>
   );
 };
 

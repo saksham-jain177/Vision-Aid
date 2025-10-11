@@ -372,9 +372,16 @@ body, html {
 }
 
 .project-masonry-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  border-color: rgba(49, 130, 206, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+  border-color: rgba(49, 130, 206, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.light-mode .project-masonry-card:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.06);
 }
 
 .project-card-content {
@@ -408,8 +415,8 @@ body, html {
 }
 
 .project-masonry-card:hover .project-image {
-  transform: scale(1.02);
-  transition: transform 0.3s ease;
+  transform: scale(1.03);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .project-features {
@@ -1455,6 +1462,7 @@ body, html {
 
 .project-masonry-card:hover::before {
   transform: scaleX(1);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .project-header {

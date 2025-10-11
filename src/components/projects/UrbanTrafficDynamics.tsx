@@ -5,6 +5,7 @@ import { ArrowLeft, Play, BarChart3, Settings, Info, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import TrafficSimulator from './TrafficSimulator';
 import YOLODetection from './YOLODetection';
+import IntersectionGridView from './IntersectionGridView';
 import './UrbanTrafficDynamics.css';
 
 const UrbanTrafficDynamics: React.FC = () => {
@@ -13,7 +14,8 @@ const UrbanTrafficDynamics: React.FC = () => {
     return saved ? JSON.parse(saved) : true;
   });
   const [activeTab, setActiveTab] = useState<'simulator' | 'analytics' | 'about' | 'yolo'>('simulator');
-  const [yoloDetections, setYoloDetections] = useState<any[]>([]);
+  const [showYoloModal, setShowYoloModal] = useState(false);
+  const [showGridView, setShowGridView] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
@@ -41,12 +43,7 @@ const UrbanTrafficDynamics: React.FC = () => {
       case 'simulator':
         return <TrafficSimulator />;
       case 'yolo':
-        return (
-          <YOLODetection 
-            isActive={activeTab === 'yolo'}
-            onDetectionUpdate={setYoloDetections}
-          />
-        );
+        return <TrafficSimulator />;
       case 'analytics':
         return (
           <div className="analytics-content">
@@ -141,18 +138,18 @@ const UrbanTrafficDynamics: React.FC = () => {
   return (
     <div className={`urban-traffic-container ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
       <div className="urban-header">
-        <Link to="/projects" className="back-button">
-          <ArrowLeft />
-          <span>Back to Projects</span>
-        </Link>
+      <Link to="/projects" className="back-button">
+        <ArrowLeft />
+        <span>Back to Projects</span>
+      </Link>
         <div className="header-controls">
           <div className="theme-switch-wrapper">
             <label className="guardian-theme-switch">
-              <input
-                type="checkbox"
-                checked={!isDarkMode}
-                onChange={() => setIsDarkMode(!isDarkMode)}
-              />
+          <input
+            type="checkbox"
+            checked={!isDarkMode}
+            onChange={() => setIsDarkMode(!isDarkMode)}
+          />
               <div className="guardian-slider">
                 <div className="guardian-gooey-ball"></div>
                 <div className="guardian-gooey-icons">
@@ -166,8 +163,8 @@ const UrbanTrafficDynamics: React.FC = () => {
                       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
-              </div>
-            </label>
+          </div>
+        </label>
           </div>
         </div>
       </div>
@@ -195,8 +192,8 @@ const UrbanTrafficDynamics: React.FC = () => {
           id="yolo"
           label="YOLO Detection"
           icon={Eye}
-          isActive={activeTab === 'yolo'}
-          onClick={() => setActiveTab('yolo')}
+          isActive={showYoloModal}
+          onClick={() => setShowYoloModal(true)}
         />
         <TabButton
           id="analytics"
@@ -223,6 +220,20 @@ const UrbanTrafficDynamics: React.FC = () => {
       >
         {renderContent()}
           </motion.div>
+
+      {/* YOLO Detection Modal */}
+      {showYoloModal && (
+        <YOLODetection onClose={() => setShowYoloModal(false)} />
+      )}
+
+      {/* Grid View Modal */}
+      {showGridView && (
+        <IntersectionGridView 
+          isVisible={showGridView}
+          rows={3}
+          cols={3}
+        />
+      )}
     </div>
   );
 };

@@ -8,6 +8,7 @@ import { createIncidentDetectionSystem, Incident } from '../../services/incident
 import { createAdaptiveTimingSystem, TimingAdjustment } from '../../services/adaptiveTiming';
 import { createPerformanceMetricsService } from '../../services/performanceMetrics';
 import PerformanceDashboard from './PerformanceDashboard';
+import IntersectionGridView from './IntersectionGridView';
 import './TrafficSimulator.css';
 
 interface TrafficLight {
@@ -84,9 +85,10 @@ const TrafficSimulator: React.FC = () => {
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const [performanceService, setPerformanceService] = useState<any>(null);
   const [showPerformanceDashboard, setShowPerformanceDashboard] = useState(false);
+  const [showGridView, setShowGridView] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
   const vehicleIdRef = useRef(0);
   const lastStateRef = useRef<TrafficState | null>(null);
   const lastActionRef = useRef<Action | null>(null);
@@ -156,28 +158,34 @@ const TrafficSimulator: React.FC = () => {
     };
   }, [vehicles, trafficLights]);
 
-  // Generate random vehicles with different types
+  // Generate random vehicles with different types - keeping them in proper lanes
   const generateVehicle = useCallback(() => {
     const directions: Array<'north' | 'south' | 'east' | 'west'> = ['north', 'south', 'east', 'west'];
     const direction = directions[Math.floor(Math.random() * directions.length)];
     
     let x = 0, y = 0;
+    const laneOffset = 10; // Distance from center line
+    
     switch (direction) {
       case 'north':
-        x = 400 + (Math.random() - 0.5) * 20;
+        // Moving upward (north) - stay on RIGHT side of center line
+        x = 400 + laneOffset + Math.random() * 8;
         y = 600;
         break;
       case 'south':
-        x = 400 + (Math.random() - 0.5) * 20;
+        // Moving downward (south) - stay on LEFT side of center line
+        x = 400 - laneOffset - Math.random() * 8;
         y = 0;
         break;
       case 'east':
+        // Moving right (east) - stay on BOTTOM side of center line
         x = 0;
-        y = 300 + (Math.random() - 0.5) * 20;
+        y = 300 + laneOffset + Math.random() * 8;
         break;
       case 'west':
+        // Moving left (west) - stay on TOP side of center line
         x = 800;
-        y = 300 + (Math.random() - 0.5) * 20;
+        y = 300 - laneOffset - Math.random() * 8;
         break;
     }
 
@@ -191,7 +199,7 @@ const TrafficSimulator: React.FC = () => {
       speed: 1.5 + Math.random() * 0.5, // Consistent, reasonable speed
       waitingTime: 0,
       color: colors[Math.floor(Math.random() * colors.length)],
-      type: 'car',
+      type: 'car' as 'car' | 'truck' | 'bus' | 'motorcycle',
       size: 12,
     };
   }, []);
@@ -386,38 +394,87 @@ const TrafficSimulator: React.FC = () => {
 
   // Update traffic lights with delay based on vehicle count
   const updateTrafficLights = useCallback(() => {
-    setTrafficLights(prev => prev.map(light => {
-      const newTimer = light.timer + 1;
-      
-      if (newTimer >= light.maxTimer) {
-        // Simple 2-phase system: North-South vs East-West
-        let newState: 'red' | 'yellow' | 'green' = 'red';
-        let newMaxTimer = 30;
+    setTrafficLights(prev => {
+      // Count vehicles in each direction
+      const vehiclesByDirection = {
+        north: vehicles.filter(v => v.direction === 'north').length,
+        south: vehicles.filter(v => v.direction === 'south').length,
+        east: vehicles.filter(v => v.direction === 'east').length,
+        west: vehicles.filter(v => v.direction === 'west').length
+      };
+
+      // Count waiting vehicles (those stopped at intersection)
+      const waitingByDirection = {
+        north: vehicles.filter(v => v.direction === 'north' && v.waitingTime > 2).length,
+        south: vehicles.filter(v => v.direction === 'south' && v.waitingTime > 2).length,
+        east: vehicles.filter(v => v.direction === 'east' && v.waitingTime > 2).length,
+        west: vehicles.filter(v => v.direction === 'west' && v.waitingTime > 2).length
+      };
+
+      // Calculate pressure for each axis
+      const northSouthPressure = vehiclesByDirection.north + vehiclesByDirection.south + 
+                                 (waitingByDirection.north + waitingByDirection.south) * 2;
+      const eastWestPressure = vehiclesByDirection.east + vehiclesByDirection.west + 
+                              (waitingByDirection.east + waitingByDirection.west) * 2;
+
+      return prev.map(light => {
+        const newTimer = light.timer + 1;
+        const isNorthSouth = light.direction === 'north' || light.direction === 'south';
+        const isEastWest = light.direction === 'east' || light.direction === 'west';
         
-        // Determine if this light should be green based on phase
-        const isNorthSouthPhase = (light.direction === 'north' || light.direction === 'south');
-        const isEastWestPhase = (light.direction === 'east' || light.direction === 'west');
-        
-        // Alternate between phases every 30 seconds
-        const phaseTime = Math.floor(newTimer / 30) % 2;
-        
-        if (phaseTime === 0 && isNorthSouthPhase) {
-          newState = 'green';
-          newMaxTimer = 30;
-        } else if (phaseTime === 1 && isEastWestPhase) {
-          newState = 'green';
-          newMaxTimer = 30;
-        } else {
-          newState = 'red';
-          newMaxTimer = 30;
+        if (newTimer >= light.maxTimer) {
+          let newState: 'red' | 'yellow' | 'green' = 'red';
+          let newMaxTimer = 20; // Base time
+          
+          // Intelligent timing based on vehicle count
+          if (light.state === 'green') {
+            // Currently green, check if we should switch
+            const currentPressure = isNorthSouth ? northSouthPressure : eastWestPressure;
+            const otherPressure = isNorthSouth ? eastWestPressure : northSouthPressure;
+            
+            // If other direction has significantly more vehicles, switch to yellow
+            if (otherPressure > currentPressure + 3) {
+              newState = 'yellow';
+              newMaxTimer = 3; // Yellow for 3 seconds
+            } else {
+              // Extend green if still have vehicles
+              newState = 'green';
+              newMaxTimer = Math.min(40, 20 + currentPressure * 2); // Dynamic green time (20-40s)
+            }
+          } else if (light.state === 'yellow') {
+            // Yellow transitions to red
+            newState = 'red';
+            newMaxTimer = 2; // Small delay before other direction goes green
+          } else {
+            // Currently red, check if this direction should go green
+            const currentPressure = isNorthSouth ? northSouthPressure : eastWestPressure;
+            const otherPressure = isNorthSouth ? eastWestPressure : northSouthPressure;
+            
+            // Check if other direction is green
+            const otherLightGreen = prev.some(l => 
+              ((isNorthSouth && (l.direction === 'east' || l.direction === 'west')) ||
+               (isEastWest && (l.direction === 'north' || l.direction === 'south'))) &&
+              l.state === 'green'
+            );
+            
+            if (!otherLightGreen && currentPressure > 0) {
+              // No conflict, we can go green
+              newState = 'green';
+              newMaxTimer = Math.min(40, 20 + currentPressure * 2);
+            } else {
+              // Stay red
+              newState = 'red';
+              newMaxTimer = 5;
+            }
+          }
+          
+          return { ...light, state: newState, timer: 0, maxTimer: newMaxTimer };
         }
         
-        return { ...light, state: newState, timer: 0, maxTimer: newMaxTimer };
-      }
-      
-      return { ...light, timer: newTimer };
-    }));
-  }, []);
+        return { ...light, timer: newTimer };
+      });
+    });
+  }, [vehicles]);
 
   // Update vehicles with simple movement logic
   const updateVehicles = useCallback(() => {
@@ -437,22 +494,24 @@ const TrafficSimulator: React.FC = () => {
           // Vehicle is moving
           newWaitingTime = 0;
           
+          const laneOffset = 10; // Keep vehicles in their proper lane
+          
           switch (vehicle.direction) {
             case 'north':
               newY = vehicle.y - vehicle.speed;
-              newX = 400; // Keep on center line
+              newX = 400 + laneOffset + 4; // Right side of center line
               break;
             case 'south':
               newY = vehicle.y + vehicle.speed;
-              newX = 400; // Keep on center line
+              newX = 400 - laneOffset - 4; // Left side of center line
               break;
             case 'east':
               newX = vehicle.x + vehicle.speed;
-              newY = 300; // Keep on center line
+              newY = 300 + laneOffset + 4; // Bottom side of center line
               break;
             case 'west':
               newX = vehicle.x - vehicle.speed;
-              newY = 300; // Keep on center line
+              newY = 300 - laneOffset - 4; // Top side of center line
               break;
           }
         }
@@ -463,8 +522,13 @@ const TrafficSimulator: React.FC = () => {
         return vehicle.x >= -50 && vehicle.x <= 850 && vehicle.y >= -50 && vehicle.y <= 650;
       });
       
-      // Add new vehicles very rarely
-      if (Math.random() < 0.0005) {
+      // Add new vehicles regularly for realistic traffic
+      if (Math.random() < 0.008) { // Increased from 0.0005 to 0.008 (16x more vehicles)
+        newVehicles.push(generateVehicle());
+      }
+      
+      // Ensure minimum traffic for demonstration
+      if (newVehicles.length < 8) {
         newVehicles.push(generateVehicle());
       }
       
@@ -621,38 +685,84 @@ const TrafficSimulator: React.FC = () => {
     ctx.stroke();
     ctx.setLineDash([]);
     
-    // Draw traffic lights with poles
+    // Draw traffic lights (sideways/horizontal like real traffic lights)
     trafficLights.forEach(light => {
-      const { x, y, state } = light;
-      const lightSize = 15;
+      const { position, state, direction } = light;
+      const { x, y } = position;
       
-      // Light pole (taller and more visible)
+      // Determine light orientation based on direction
+      const isVerticalRoad = direction === 'north' || direction === 'south';
+      
+      // Light pole (positioned to side of road)
       ctx.fillStyle = '#2C3E50';
-      ctx.fillRect(x - 4, y - 4, 8, 35);
+      if (isVerticalRoad) {
+        // For vertical roads, pole is to the side
+        const poleX = direction === 'north' ? x + 25 : x - 25;
+        ctx.fillRect(poleX - 2, y - 40, 4, 40);
+      } else {
+        // For horizontal roads, pole is above/below
+        const poleY = direction === 'east' ? y + 25 : y - 25;
+        ctx.fillRect(x - 2, poleY - 40, 4, 40);
+      }
       
-      // Light housing (black rectangle)
+      // Traffic light housing (horizontal rectangle)
+      const housingWidth = 60;
+      const housingHeight = 20;
       ctx.fillStyle = '#1A1A1A';
-      ctx.fillRect(x - 12, y - 8, 24, 20);
       
-      // Light (brighter colors)
-      ctx.fillStyle = state === 'red' ? '#FF0000' : state === 'yellow' ? '#FFFF00' : '#00FF00';
+      if (isVerticalRoad) {
+        const housingX = direction === 'north' ? x + 15 : x - 45;
+        ctx.fillRect(housingX, y - 10, housingWidth, housingHeight);
+        
+        // Draw three lights (red, yellow, green) horizontally
+        drawThreeLights(ctx, housingX + 10, y, state);
+      } else {
+        const housingY = direction === 'east' ? y + 15 : y - 45;
+        ctx.fillRect(x - 30, housingY, housingWidth, housingHeight);
+        
+        // Draw three lights (red, yellow, green) horizontally
+        drawThreeLights(ctx, x - 20, housingY + 10, state);
+      }
+    });
+    
+    // Helper function to draw three lights
+    function drawThreeLights(ctx: CanvasRenderingContext2D, startX: number, centerY: number, state: string) {
+      const lightRadius = 7;
+      const spacing = 20;
+      
+      // Red light
       ctx.beginPath();
-      ctx.arc(x, y, lightSize, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Light border
-      ctx.strokeStyle = '#2C3E50';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      
-      // Add glow effect
-      ctx.shadowColor = state === 'red' ? '#FF0000' : state === 'yellow' ? '#FFFF00' : '#00FF00';
-      ctx.shadowBlur = 8;
-      ctx.beginPath();
-      ctx.arc(x, y, lightSize - 3, 0, Math.PI * 2);
+      ctx.arc(startX, centerY, lightRadius, 0, Math.PI * 2);
+      ctx.fillStyle = state === 'red' ? '#FF3333' : '#4A0000';
+      if (state === 'red') {
+        ctx.shadowColor = '#FF0000';
+        ctx.shadowBlur = 15;
+      }
       ctx.fill();
       ctx.shadowBlur = 0;
-    });
+      
+      // Yellow light
+      ctx.beginPath();
+      ctx.arc(startX + spacing, centerY, lightRadius, 0, Math.PI * 2);
+      ctx.fillStyle = state === 'yellow' ? '#FFD700' : '#4A4A00';
+      if (state === 'yellow') {
+        ctx.shadowColor = '#FFA500';
+        ctx.shadowBlur = 15;
+      }
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      
+      // Green light
+      ctx.beginPath();
+      ctx.arc(startX + spacing * 2, centerY, lightRadius, 0, Math.PI * 2);
+      ctx.fillStyle = state === 'green' ? '#00FF00' : '#004A00';
+      if (state === 'green') {
+        ctx.shadowColor = '#00CC00';
+        ctx.shadowBlur = 15;
+      }
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
     
     // Draw vehicles with different shapes
     vehicles.forEach(vehicle => {
@@ -733,6 +843,15 @@ const TrafficSimulator: React.FC = () => {
 
   const handleStart = () => {
     setIsRunning(true);
+    
+    // Add initial vehicles if none exist for better demonstration
+    if (vehicles.length === 0) {
+      const initialVehicles = [];
+      for (let i = 0; i < 12; i++) {
+        initialVehicles.push(generateVehicle());
+      }
+      setVehicles(initialVehicles);
+    }
   };
 
   const handlePause = () => {
@@ -811,6 +930,15 @@ const TrafficSimulator: React.FC = () => {
             >
               <Settings size={18} />
               Advanced
+            </button>
+            
+            <button 
+              className={`control-btn secondary ${showGridView ? 'active' : ''}`}
+              onClick={() => setShowGridView(!showGridView)}
+              title="Toggle Grid View - Multi-Intersection Network"
+            >
+              <BarChart3 size={18} />
+              Grid View
             </button>
           </div>
         </div>
@@ -921,6 +1049,39 @@ const TrafficSimulator: React.FC = () => {
                 <span className="stat-label">Efficiency:</span>
                 <span className="stat-value">{stats.efficiency}%</span>
               </div>
+            </div>
+            
+            {/* Traffic Light Status with Waiting Timers */}
+            <div className="traffic-light-status">
+              <h4>Traffic Light Status</h4>
+              {trafficLights.map(light => {
+                const remainingTime = Math.max(0, light.maxTimer - light.timer);
+                const vehicleCount = vehicles.filter(v => v.direction === light.direction).length;
+                const waitingCount = vehicles.filter(v => v.direction === light.direction && v.waitingTime > 2).length;
+                
+                return (
+                  <div key={light.direction} className="light-status-item">
+                    <div className="light-status-header">
+                      <span className="direction-label">{light.direction.toUpperCase()}</span>
+                      <span className={`status-indicator status-${light.state}`}></span>
+                    </div>
+                    <div className="light-status-details">
+                      <span className="timer-display">
+                        {light.state === 'red' ? '🔴' : light.state === 'yellow' ? '🟡' : '🟢'} {remainingTime}s
+                      </span>
+                      <span className="vehicle-count">
+                        🚗 {vehicleCount} ({waitingCount} waiting)
+                      </span>
+                    </div>
+                    <div className="timer-bar">
+                      <div 
+                        className={`timer-progress timer-progress-${light.state}`}
+                        style={{ width: `${(light.timer / light.maxTimer) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             
             {rlEnabled && (
@@ -1071,6 +1232,15 @@ const TrafficSimulator: React.FC = () => {
         isVisible={showPerformanceDashboard}
         onClose={() => setShowPerformanceDashboard(false)}
       />
+
+      {showGridView && (
+        <IntersectionGridView 
+          isVisible={showGridView}
+          rows={3}
+          cols={3}
+          onClose={() => setShowGridView(false)}
+        />
+      )}
     </div>
   );
 };

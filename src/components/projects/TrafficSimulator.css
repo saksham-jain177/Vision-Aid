@@ -40,12 +40,17 @@
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 0.5rem;
+  min-width: 180px;
 }
 
 .speed-control label {
   font-size: 0.9rem;
   color: var(--text-primary);
   white-space: nowrap;
+  width: 75px;
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+  text-align: left;
 }
 
 .speed-slider {
@@ -58,6 +63,7 @@
 }
 
 .speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
   appearance: none;
   width: 16px;
   height: 16px;
@@ -122,15 +128,24 @@
 }
 
 .setting-btn:hover {
-  background: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
+  background: rgba(74, 144, 226, 0.2);
+  color: #4a90e2;
+  border-color: rgba(74, 144, 226, 0.5);
+  transform: translateY(-1px);
 }
 
 .setting-btn.active {
-  background: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 2px solid #a855f7;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
+}
+
+.setting-btn.active:hover {
+  background: rgba(168, 85, 247, 0.1);
+  border-color: #a855f7;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
+  transform: translateY(-1px);
 }
 
 .top-right-controls {
@@ -181,8 +196,45 @@
   background: #4a5568;
 }
 
+.control-btn.secondary {
+  background: rgba(74, 144, 226, 0.15);
+  border: 2px solid rgba(74, 144, 226, 0.3);
+  color: #4a90e2;
+  backdrop-filter: blur(10px);
+}
+
+.control-btn.secondary:hover {
+  background: rgba(74, 144, 226, 0.25);
+  border-color: rgba(74, 144, 226, 0.5);
+  color: #5ba3f5;
+  transform: translateY(-2px);
+}
+
+.control-btn.secondary.active {
+  background: rgba(74, 144, 226, 0.15);
+  border: 2px solid #a855f7;
+  color: #4a90e2;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
+}
+
+.control-btn.secondary.active:hover {
+  background: rgba(168, 85, 247, 0.1);
+  border-color: #a855f7;
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
+}
+
 .control-btn.active {
-  background: #48bb78;
+  background: var(--color-primary);
+  border: 2px solid #a855f7;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
+}
+
+.control-btn.active:hover {
+  background: #2c5aa0;
+  border-color: #a855f7;
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
 }
 
 /* Day/Night Toggle Switch - Removed duplicate styles */
@@ -205,6 +257,7 @@
   background: var(--card-border);
   outline: none;
   -webkit-appearance: none;
+  appearance: none;
 }
 
 .speed-control input[type="range"]::-webkit-slider-thumb {
@@ -251,9 +304,18 @@
   padding: 1.5rem;
   backdrop-filter: blur(10px);
   z-index: 100;
+  width: 300px;
+  min-width: 300px;
   max-width: 300px;
   max-height: 80vh;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.traffic-simulator .stats-panel {
+  /* Smooth scrolling and prevent jumping */
+  scroll-behavior: smooth;
+  will-change: scroll-position;
 }
 
 .traffic-simulator .settings-panel h3,
@@ -294,6 +356,7 @@
   align-items: center;
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--card-border);
+  min-height: 36px;
 }
 
 .stat-item:last-child {
@@ -303,12 +366,124 @@
 .stat-label {
   color: var(--text-primary);
   font-weight: 500;
+  flex-shrink: 0;
+  min-width: 120px;
 }
 
 .stat-value {
   color: var(--color-primary);
   font-weight: 700;
   font-size: 1.1rem;
+  min-width: 65px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Traffic Light Status Panel */
+.traffic-light-status {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--card-border);
+}
+
+.traffic-light-status h4 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.light-status-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--card-border);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.light-status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.direction-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.status-indicator.status-red {
+  background: #FF3333;
+  color: #FF0000;
+}
+
+.status-indicator.status-yellow {
+  background: #FFD700;
+  color: #FFA500;
+}
+
+.status-indicator.status-green {
+  background: #00FF00;
+  color: #00CC00;
+}
+
+.light-status-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  min-height: 24px;
+}
+
+.timer-display {
+  color: var(--text-primary);
+  font-weight: 500;
+  min-width: 60px;
+  font-variant-numeric: tabular-nums;
+}
+
+.vehicle-count {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  min-width: 130px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.timer-progress {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.timer-progress-red {
+  background: linear-gradient(90deg, #FF3333, #FF6666);
+}
+
+.timer-progress-yellow {
+  background: linear-gradient(90deg, #FFD700, #FFA500);
+}
+
+.timer-progress-green {
+  background: linear-gradient(90deg, #00FF00, #00CC00);
 }
 
 .rl-stats {
