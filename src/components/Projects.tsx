@@ -12,6 +12,7 @@ import './Projects.css';
 import Chatbot from './Chatbot';
 import ProjectDetailsModal from './projects/ProjectDetailsModal';
 import SuggestProjectModal from './projects/SuggestProjectModal';
+import Footer from './Footer';
 import { useLocation } from 'react-router-dom';
 
 
@@ -182,14 +183,14 @@ const Projects: React.FC = () => {
           <p>Transforming urban infrastructure through intelligent technology.</p>
           <div className="social-icons">
             <a
-              href="https://github.com/ArnavNath2003/Vision-Aid"
+              href="https://github.com/saksham-jain177/Vision-Aid"
               className="social-icon"
               target="_blank"
               rel="noopener noreferrer"
             >
               <FaGithub />
             </a>
-            <a href="#" className="social-icon"><FaLinkedin /></a>
+            <a href="https://www.linkedin.com/in/saksham-j-95a206225/" className="social-icon" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
             <a href="#" className="social-icon"><FaTwitter /></a>
             <a href="#" className="social-icon"><FaInstagram /></a>
           </div>
@@ -205,8 +206,8 @@ const Projects: React.FC = () => {
         </div>
         <div className="footer-section">
           <h4 className="footer-title">Contact</h4>
-          <p>Email: info@visionaid.tech</p>
-          <p>Phone: +1 (555) 123-4567</p>
+          <p>Email: 177sakshamjain@gmail.com</p>
+          <p>AI Developer: Saksham Jain</p>
         </div>
         <div className="footer-section">
           <h4 className="footer-title">Newsletter</h4>
@@ -513,7 +514,13 @@ const Projects: React.FC = () => {
               Get involved with our projects or suggest new accessibility challenges we can solve together.
             </p>
             <div className="cta-buttons">
-              <button className="cta-button primary">
+              <button 
+                className="cta-button primary"
+                onClick={() => {
+                  // Open GitHub contributing guidelines
+                  window.open('https://github.com/saksham-jain177/Vision-Aid/blob/main/CONTRIBUTING.md', '_blank');
+                }}
+              >
                 Become a Partner
               </button>
               <button

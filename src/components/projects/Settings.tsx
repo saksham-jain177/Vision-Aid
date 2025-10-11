@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, RefreshCw, Eye, EyeOff, MapPin, Wifi, WifiOff, Zap, BarChart } from 'lucide-react';
+import { Settings as SettingsIcon, RefreshCw, Eye, EyeOff, MapPin, Wifi, WifiOff, BarChart } from 'lucide-react';
 import Toast from '../Toast';
 import './GuardianVision.css';
 
@@ -51,8 +51,8 @@ const Settings: React.FC<SettingsProps> = ({
   setMatchThresholdSlider,
   frameSkip,
   setFrameSkip,
-  performanceMode,
-  setPerformanceMode,
+  // performanceMode,
+  // setPerformanceMode,
   dataAugmentation = true,
   setDataAugmentation = () => {},
   onOpenDashboard

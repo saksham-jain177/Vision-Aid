@@ -56,14 +56,17 @@ An advanced facial recognition system for detecting, locating, and finding missi
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 19.0.0 with TypeScript 5.7.2
+- **Styling**: Custom CSS (No Tailwind)
 - **3D Graphics**: Three.js 0.174.0
-- **Face Recognition**: face-api.js 0.22.2
-- **Icons**: Lucide React 0.477.0
+- **Face Recognition**: face-api.js 0.20.0
+- **Icons**: Lucide React 0.477.0 + React Icons 5.5.0
 - **Animations**: Framer Motion 12.4.10
 - **Routing**: React Router DOM 7.2.0
 - **AI Integration**: OpenRouter API
 - **Build Tool**: Vite 6.2.0
 - **Offline Storage**: IndexedDB (via idb 8.0.2)
+- **Email**: @emailjs/browser 4.4.1
+- **Layout**: react-masonry-css 1.0.16
 
 ## 🚀 Getting Started
 
@@ -103,14 +106,18 @@ An advanced facial recognition system for detecting, locating, and finding missi
   yarn dev
   ```
 
-Visit `http://localhost:5173` to view the application.
+Visit `http://localhost:3000` to view the application.
 
 ## 🔧 Available Scripts
 
 - `npm run dev` - Start development server
-- `npm run build` - Build for production
+- `npm run build` - Build for production (Vite only)
+- `npm run build:check` - Build with TypeScript checking
 - `npm run lint` - Run ESLint
+- `npm run lint:fix` - Run ESLint with auto-fix
 - `npm run preview` - Preview production build
+- `npm run audit` - Check for security vulnerabilities
+- `npm run clean` - Clean build artifacts
 
 ## 📁 Project Structure
 
@@ -188,9 +195,7 @@ Access comprehensive analytics including:
 
 ## 👥 Contributors
 
-- [Arnav Nath](https://github.com/shichancoder) - Project Lead & Database Architect
 - [Saksham Jain](https://github.com/saksham-jain177) - Lead Developer & CV Engineer
-- [Aryan Sansi](https://github.com/Aryansansi) - Assistant Developer & AI/ML Specialist
 
 Want to contribute? Check out our [Contributing Guidelines](CONTRIBUTING.md).
 
@@ -208,10 +213,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-- GitHub: [@shichancoder](https://github.com/shichancoder)
-- GitHub: [@saksham-jain177](https://github.com/saksham-jain177)
-- GitHub: [@Aryansansi](https://github.com/Aryansansi)
-- Project Link: [https://github.com/shichancoder/Vision-Aid](https://github.com/shichancoder/Vision-Aid)
+- **Developer**: Saksham Jain
+- **Email**: 177sakshamjain@gmail.com
+- **GitHub**: [@saksham-jain177](https://github.com/saksham-jain177)
+- **Project Link**: [https://github.com/saksham-jain177/Vision-Aid](https://github.com/saksham-jain177/Vision-Aid)
 
 ## 🚀 Roadmap
 

@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaGithub, FaLinkedin, FaTwitter, FaInstagram, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-// @ts-expect-error Icons may be used in future implementation
 import { Globe, Sun, Moon, MessageCircle, X, Send, ArrowRight } from 'lucide-react';
 import './Contact.css';
 import Chatbot from './Chatbot';
@@ -11,7 +10,6 @@ import { useLocation } from 'react-router-dom';
 const Contact: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  // @ts-expect-error Chat functionality to be implemented
   const [chatMessage, setChatMessage] = useState('');
   const [formData, setFormData] = useState({
     name: '',
@@ -56,10 +54,30 @@ const Contact: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
+    
+    // Create mailto link with form data
+    const subject = encodeURIComponent(formData.subject);
+    const body = encodeURIComponent(
+      `Name: ${formData.name}\n` +
+      `Email: ${formData.email}\n\n` +
+      `Message:\n${formData.message}`
+    );
+    
+    // Open email client with pre-filled data
+    window.open(`mailto:177sakshamjain@gmail.com?subject=${subject}&body=${body}`);
+    
+    // Reset form
+    setFormData({
+      name: '',
+      email: '',
+      subject: '',
+      message: ''
+    });
+    
+    // Show success message (you could add a toast notification here)
+    alert('Email client opened! Please send the email to complete your message.');
   };
 
   const Header = () => {
@@ -94,14 +112,14 @@ const Contact: React.FC = () => {
           <p>Transforming urban infrastructure through intelligent technology.</p>
           <div className="social-icons">
             <a 
-              href="https://github.com/ArnavNath2003/Vision-Aid" 
+              href="https://github.com/saksham-jain177/Vision-Aid" 
               className="social-icon"
               target="_blank"
               rel="noopener noreferrer"
             >
               <FaGithub />
             </a>
-            <a href="#" className="social-icon"><FaLinkedin /></a>
+            <a href="https://www.linkedin.com/in/saksham-j-95a206225/" className="social-icon" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
             <a href="#" className="social-icon"><FaTwitter /></a>
             <a href="#" className="social-icon"><FaInstagram /></a>
           </div>
@@ -117,8 +135,8 @@ const Contact: React.FC = () => {
         </div>
         <div className="footer-section">
           <h4 className="footer-title">Contact</h4>
-          <p>Email: info@visionaid.tech</p>
-          <p>Phone: +1 (555) 123-4567</p>
+          <p>Email: 177sakshamjain@gmail.com</p>
+          <p>AI Developer: Saksham Jain</p>
         </div>
         <div className="footer-section">
           <h4 className="footer-title">Newsletter</h4>
@@ -211,9 +229,9 @@ const Contact: React.FC = () => {
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
-              <FaPhone className="contact-icon" />
-              <h3>Phone</h3>
-              <p>+91 8289092829 <br />Mon - Fri, 9:00 - 18:00</p>
+              <FaEnvelope className="contact-icon" />
+              <h3>Email</h3>
+              <p>177sakshamjain@gmail.com<br />Available for inquiries</p>
             </motion.div>
 
             <motion.div
@@ -223,9 +241,9 @@ const Contact: React.FC = () => {
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
             >
-              <FaEnvelope className="contact-icon" />
-              <h3>Email</h3>
-              <p>arnavnath2003@gmail.com<br />support@visionaid.tech</p>
+              <FaGithub className="contact-icon" />
+              <h3>AI Developer</h3>
+              <p>Saksham Jain<br />Computer Vision & AI Specialist</p>
             </motion.div>
           </div>
         </section>
@@ -299,18 +317,16 @@ const Contact: React.FC = () => {
         {/* Map Section */}
         <section className="map-section">
           <div className="map-container">
-            {/* Add your map component or iframe here */}
-            <div className="map-placeholder">
-              <motion.div
-                className="map-overlay"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-              >
-                <h3>Interactive Map Coming Soon</h3>
-                <p>Visit us at our innovation hub</p>
-              </motion.div>
-            </div>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3502.123456789!2d77.123456789!3d28.123456789!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjjCsDA3JzI0LjQiTiA3N8KwMDcnMjQuNCJF!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin"
+              width="100%"
+              height="400"
+              style={{ border: 0, borderRadius: '12px' }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Vision Aid Location Map"
+            />
           </div>
         </section>
 

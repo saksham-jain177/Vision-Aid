@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import * as faceapi from 'face-api.js';
 import { FaceCluster, enhancedFaceMatching } from '../../utils/faceClusteringUtils';
 
@@ -183,11 +183,16 @@ export const useEnhancedFaceMatching = (
       };
     } else {
       // Fall back to original matching algorithm if no clusters
-      let bestMatch = {
+      let bestMatch: {
+        distance: number;
+        isMatch: boolean;
+        confidence: number;
+        verificationLevel: 'high' | 'medium' | 'low' | 'none';
+      } = {
         distance: Number.MAX_VALUE,
         isMatch: false,
         confidence: 0,
-        verificationLevel: 'none' as 'none'
+        verificationLevel: 'none'
       };
 
       // Group encodings by person (based on label prefix)

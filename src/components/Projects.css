@@ -365,10 +365,16 @@ body, html {
   border: 1px solid var(--card-border);
   border-radius: 24px;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease;
   min-height: 450px; /* Use min-height instead of fixed height */
   display: flex;
   flex-direction: column;
+}
+
+.project-masonry-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: rgba(49, 130, 206, 0.3);
 }
 
 .project-card-content {
@@ -402,7 +408,8 @@ body, html {
 }
 
 .project-masonry-card:hover .project-image {
-  transform: scale(1.05);
+  transform: scale(1.02);
+  transition: transform 0.3s ease;
 }
 
 .project-features {
@@ -1431,19 +1438,7 @@ body, html {
   font-size: 1rem;
 }
 
-.project-masonry-card {
-  background: var(--card-bg);
-  border: 2px solid var(--card-border);
-  border-radius: 1.5rem;
-  padding: 1.5rem; /* Further reduced from 2rem */
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: default; /* Changed from pointer to default */
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px var(--card-shadow);
-  margin-bottom: 1rem; /* Reduced from 1.5rem */
-}
+/* Duplicate definition removed - using the main one above */
 
 .project-masonry-card::before {
   content: '';

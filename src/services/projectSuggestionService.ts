@@ -15,7 +15,7 @@ export const getSuggestions = (): ProjectSuggestion[] => {
   return storedSuggestions ? JSON.parse(storedSuggestions) : [];
 };
 
-// Add a new suggestion to local storage
+// Add a new suggestion to local storage and send email
 export const addSuggestion = (email: string, suggestion: string): ProjectSuggestion => {
   const suggestions = getSuggestions();
   
@@ -31,8 +31,18 @@ export const addSuggestion = (email: string, suggestion: string): ProjectSuggest
   suggestions.push(newSuggestion);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(suggestions));
   
-  // In a real application, you might also send this to a server API
-  console.log('New project suggestion saved:', newSuggestion);
+  // Send email to developer
+  const subject = encodeURIComponent('Suggesting Project/Enhancement via VisionAid');
+  const body = encodeURIComponent(
+    `User Mail: ${email}\n\n` +
+    `Suggestion: ${suggestion}\n\n` +
+    `Submitted at: ${new Date().toLocaleString()}`
+  );
+  
+  // Open email client with pre-filled data
+  window.open(`mailto:177sakshamjain@gmail.com?subject=${subject}&body=${body}`);
+  
+  console.log('New project suggestion saved and email opened:', newSuggestion);
   
   return newSuggestion;
 };

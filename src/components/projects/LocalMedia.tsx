@@ -247,8 +247,7 @@ const LocalMedia: React.FC<LocalMediaProps> = ({ faceMatcher, onClose, matchThre
           if (detection.landmarks) {
             const drawLandmarks = new faceapi.draw.DrawFaceLandmarks(detection.landmarks, {
               lineWidth: 2,
-              drawLines: true,
-              color: isMatch ? 'rgb(0, 255, 0)' : 'rgb(255, 0, 0)'
+              drawLines: true
             });
             drawLandmarks.draw(canvas);
           }
