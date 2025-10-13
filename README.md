@@ -28,15 +28,21 @@ VisionAid is a cutting-edge urban infrastructure management platform that levera
 
 ### Urban Traffic Dynamics
 
-Leverages computer vision to solve major urbanization problems related to traffic signal waiting times. This system measures traffic density in real-time and dynamically adjusts signal timing to reduce waiting times, resulting in up to 35% congestion reduction in pilot cities.
+A real-time traffic simulation and optimization system that implements round-robin scheduling algorithms to manage traffic signals at intersections. The system calculates traffic density dynamically and allocates green light duration proportionally to waiting vehicle counts, ensuring efficient traffic flow across all directions.
 
-**Key Features:**
+**Core Algorithm:**
 
-- Real-time traffic flow optimization
-- Predictive congestion management
-- Smart traffic light synchronization
-- Emergency vehicle priority routing
-- Traffic density analysis
+The simulator employs a round-robin phase scheduler that alternates between North-South (NS) and East-West (EW) traffic axes. Signal timing is computed using density-based formulas:
+
+```
+Base Time = 20 seconds
+Time Per Vehicle = 3 seconds
+Green Duration = min(60s, max(10s, Base Time + (Density × Time Per Vehicle)))
+```
+
+Additional optimizations include priority adjustments for high-density ratios (>2:1) where the congested axis receives +30% green time while the less congested axis receives -30% time. This ensures adaptive resource allocation based on real-time traffic conditions.
+
+The system also implements first-come-first-serve vehicle priority resolution during intersection conflicts, preventing deadlocks while maintaining realistic traffic behavior.
 
 ### Guardian Vision
 

@@ -44,7 +44,7 @@ interface Route {
 
 const TrafficSimulatorV2: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
   const [isRunning, setIsRunning] = useState(false);
   const [speed, setSpeed] = useState(1);
   const frameCountRef = useRef(0);
@@ -109,6 +109,7 @@ const TrafficSimulatorV2: React.FC = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [currentPhase, setCurrentPhase] = useState<'NS' | 'EW'>('EW');
   const [phaseTimer, setPhaseTimer] = useState(0);
+  const intersectionReservation = useRef<string | null>(null); // Proximity sensor: which vehicle has reserved intersection
   
   // Define possible routes
   const routes: Route[] = [
@@ -138,13 +139,16 @@ const TrafficSimulatorV2: React.FC = () => {
     const directions: Array<'North' | 'South' | 'East' | 'West'> = ['North', 'South', 'East', 'West'];
     const fromDirection = directions[Math.floor(Math.random() * directions.length)];
     
-    // Determine destination based on realistic turning probabilities
+    // Determine destination - REAL-WORLD TRAFFIC ENGINEERING:
+    // NO LEFT TURNS - Left turns conflict with oncoming straight traffic
+    // Example: West turning left to South would collide with East going straight to West
+    // Solution: Only allow STRAIGHT and RIGHT turns (like many real intersections)
     let toDirection: 'North' | 'South' | 'East' | 'West';
     let turnType: 'straight' | 'left' | 'right';
     const turnChance = Math.random();
     
-    if (turnChance < 0.5) {
-      // Straight (50%)
+    if (turnChance < 0.7) {
+      // Straight (70% - most traffic goes straight)
       turnType = 'straight';
       switch (fromDirection) {
         case 'North': toDirection = 'South'; break;
@@ -153,25 +157,26 @@ const TrafficSimulatorV2: React.FC = () => {
         case 'West': toDirection = 'East'; break;
         default: toDirection = 'South';
       }
-    } else if (turnChance < 0.75) {
-      // Right turn (25%)
+    } else {
+      // RIGHT TURN ONLY (30%) - Real-world traffic engineering
+      // Left turns cause conflicts with oncoming traffic
+      // Solution: RIGHT TURNS ONLY (or require protected left-turn phase)
       turnType = 'right';
       switch (fromDirection) {
-        case 'North': toDirection = 'East'; break;
-        case 'South': toDirection = 'West'; break;
-        case 'East': toDirection = 'South'; break;
-        case 'West': toDirection = 'North'; break;
-        default: toDirection = 'East';
-      }
-    } else {
-      // Left turn (25%)
-      turnType = 'left';
-      switch (fromDirection) {
-        case 'North': toDirection = 'West'; break;
-        case 'South': toDirection = 'East'; break;
-        case 'East': toDirection = 'North'; break;
-        case 'West': toDirection = 'South'; break;
-        default: toDirection = 'West';
+        case 'North':
+          toDirection = 'East'; // Right turn
+          break;
+        case 'South':
+          toDirection = 'West'; // Right turn
+          break;
+        case 'East':
+          toDirection = 'South'; // Right turn
+          break;
+        case 'West':
+          toDirection = 'North'; // Right turn
+          break;
+        default:
+          toDirection = 'South';
       }
     }
     
@@ -254,28 +259,30 @@ const TrafficSimulatorV2: React.FC = () => {
     const currentWaitTime = currentPhase === 'NS' ? nsWaitTime : ewWaitTime;
     
     // Phase transitions - CRITICAL: Never all red, never all green
-    const yellowTime = 180; // 3 seconds
+    const greenTime = currentWaitTime;
+    const yellowTime = 180; // 3 seconds (180 frames)
+    const totalCycleTime = greenTime + yellowTime; // Green + Yellow (no all-red gap)
     
-    if (phaseTimer >= currentWaitTime) {
-      // SWITCH PHASE
+    if (phaseTimer >= totalCycleTime) {
+      // SWITCH PHASE IMMEDIATELY after yellow ends
       const newPhase = currentPhase === 'NS' ? 'EW' : 'NS';
       setPhaseTimer(0);
       setCurrentPhase(newPhase);
       
-      // Update signal states - NEW phase gets green, OLD phase gets red
+      // Update signal states - NEW phase gets green immediately, OLD phase already red
       setTrafficSignals(prev => prev.map(signal => {
         const isNorthSouth = signal.position === 'North' || signal.position === 'South';
         const isEastWest = signal.position === 'East' || signal.position === 'West';
         
         if (newPhase === 'NS') {
-          // NS gets green, EW stays/becomes red
+          // NS gets green, EW stays red
           return { 
             ...signal, 
             state: isNorthSouth ? 'green' : 'red', 
             timer: 0 
           };
         } else {
-          // EW gets green, NS stays/becomes red
+          // EW gets green, NS stays red
           return { 
             ...signal, 
             state: isEastWest ? 'green' : 'red', 
@@ -283,29 +290,51 @@ const TrafficSimulatorV2: React.FC = () => {
           };
         }
       }));
-    } else if (phaseTimer === currentWaitTime - yellowTime) {
-      // Yellow warning for CURRENT green phase only
+    } else if (phaseTimer === greenTime) {
+      // Yellow warning for CURRENT green phase only (EXACTLY at green time end)
       setTrafficSignals(prev => prev.map(signal => {
         const isNorthSouth = signal.position === 'North' || signal.position === 'South';
         const isEastWest = signal.position === 'East' || signal.position === 'West';
         
-        // Only turn yellow if currently green
-        if ((currentPhase === 'NS' && isNorthSouth) ||
-            (currentPhase === 'EW' && isEastWest)) {
+        // Only turn yellow if currently green (not already yellow)
+        if (signal.state === 'green' &&
+            ((currentPhase === 'NS' && isNorthSouth) ||
+             (currentPhase === 'EW' && isEastWest))) {
           return { ...signal, state: 'yellow' };
         }
         return signal;
       }));
     }
     
-    // Update timers
-    setTrafficSignals(prev => prev.map(signal => ({
-      ...signal,
-      timer: signal.timer + 1,
-      waitingTime: signal.state === 'green' ? 
-        Math.ceil((currentWaitTime - phaseTimer) / 60) : 
-        Math.ceil((currentWaitTime + (currentPhase === 'NS' ? ewWaitTime : nsWaitTime) - phaseTimer) / 60)
-    })));
+    // Update timers - show accurate remaining time
+    setTrafficSignals(prev => prev.map(signal => {
+      const isNorthSouth = signal.position === 'North' || signal.position === 'South';
+      const isEastWest = signal.position === 'East' || signal.position === 'West';
+      const isCurrentPhase = (currentPhase === 'NS' && isNorthSouth) || (currentPhase === 'EW' && isEastWest);
+      
+      let remainingTime;
+      if (isCurrentPhase) {
+        // For current green/yellow phase
+        if (phaseTimer < greenTime) {
+          // Still green - show time until yellow
+          remainingTime = Math.ceil((greenTime - phaseTimer) / 60);
+        } else {
+          // Yellow phase - show time until red
+          remainingTime = Math.ceil((totalCycleTime - phaseTimer) / 60);
+        }
+      } else {
+        // For red phase - show time until this direction gets green
+        const otherAxisTime = currentPhase === 'NS' ? ewWaitTime : nsWaitTime;
+        const otherAxisTotal = otherAxisTime + yellowTime;
+        remainingTime = Math.ceil((otherAxisTotal - phaseTimer) / 60);
+      }
+      
+      return {
+        ...signal,
+        timer: signal.timer + 1,
+        waitingTime: Math.max(0, remainingTime)
+      };
+    }));
   }, [vehicles, currentPhase, phaseTimer]);
   
   // Update vehicles with proper lane discipline and collision prevention
@@ -344,6 +373,15 @@ const TrafficSimulatorV2: React.FC = () => {
         // Check if at intersection
         const atIntersection = Math.abs(vehicle.x - CENTER_X) < INTERSECTION_SIZE/2 && 
                               Math.abs(vehicle.y - CENTER_Y) < INTERSECTION_SIZE/2;
+        
+        // PROXIMITY SENSOR: Detect if approaching intersection (40px detection range)
+        const SENSOR_RANGE = 40;
+        const approachingIntersection = !hasTurned && (
+          (vehicle.fromDirection === 'North' && vehicle.y >= CENTER_Y - INTERSECTION_SIZE/2 - SENSOR_RANGE && vehicle.y < CENTER_Y - INTERSECTION_SIZE/2) ||
+          (vehicle.fromDirection === 'South' && vehicle.y <= CENTER_Y + INTERSECTION_SIZE/2 + SENSOR_RANGE && vehicle.y > CENTER_Y + INTERSECTION_SIZE/2) ||
+          (vehicle.fromDirection === 'East' && vehicle.x <= CENTER_X + INTERSECTION_SIZE/2 + SENSOR_RANGE && vehicle.x > CENTER_X + INTERSECTION_SIZE/2) ||
+          (vehicle.fromDirection === 'West' && vehicle.x >= CENTER_X - INTERSECTION_SIZE/2 - SENSOR_RANGE && vehicle.x < CENTER_X - INTERSECTION_SIZE/2)
+        );
         
         // Calculate potential new position
         let potentialX = newX;
@@ -391,9 +429,10 @@ const TrafficSimulatorV2: React.FC = () => {
           }
         }
         
-        // Check for collision with ALL other vehicles
+        // Check for collision with ALL other vehicles - ABSOLUTE PRIORITY: NO COLLISIONS
         let canMoveToPosition = true;
-        const minDistance = 30; // Increased for better spacing
+        const safeDistance = 30; // Safe following distance
+        const absoluteMinDistance = 15; // Absolute minimum - NEVER go below this
         
         for (let i = 0; i < prev.length; i++) {
           if (i === index) continue;
@@ -403,15 +442,35 @@ const TrafficSimulatorV2: React.FC = () => {
           const dy = potentialY - other.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
           
-          if (distance < minDistance) {
-            // Check if vehicles are in same lane or path
-            const sameLane = 
-              (vehicle.currentLane === other.currentLane) ||
-              (!vehicle.hasTurned && !other.hasTurned && vehicle.fromDirection === other.fromDirection) ||
-              (vehicle.hasTurned && other.hasTurned && vehicle.toDirection === other.toDirection);
-            
-            if (sameLane) {
-              // Check if other vehicle is ahead
+          // RULE 0: ABSOLUTE NO-COLLISION ZONE - No exceptions!
+          if (distance < absoluteMinDistance) {
+            canMoveToPosition = false;
+            break; // MUST STOP - too close for any movement
+          }
+          
+          // Check if vehicles are in same lane or path
+          const sameLane = 
+            (vehicle.currentLane === other.currentLane) ||
+            (!vehicle.hasTurned && !other.hasTurned && vehicle.fromDirection === other.fromDirection) ||
+            (vehicle.hasTurned && other.hasTurned && vehicle.toDirection === other.toDirection);
+          
+          // Check if vehicles are opposing traffic in parallel lanes (should ignore each other)
+          const isOpposingTraffic = (
+            (!vehicle.hasTurned && !other.hasTurned && vehicle.turnType === 'straight' && other.turnType === 'straight') &&
+            (
+              (vehicle.fromDirection === 'North' && other.fromDirection === 'South') ||
+              (vehicle.fromDirection === 'South' && other.fromDirection === 'North') ||
+              (vehicle.fromDirection === 'East' && other.fromDirection === 'West') ||
+              (vehicle.fromDirection === 'West' && other.fromDirection === 'East')
+            )
+          );
+          
+          if (distance < safeDistance) {
+            if (isOpposingTraffic) {
+              // Opposing traffic in parallel lanes - IGNORE (they're in different lanes)
+              continue;
+            } else if (sameLane) {
+              // Same lane - check if other vehicle is ahead
               let isAhead = false;
               if (!vehicle.hasTurned) {
                 switch (vehicle.fromDirection) {
@@ -429,21 +488,65 @@ const TrafficSimulatorV2: React.FC = () => {
                 }
               }
               
-              if (isAhead || distance < 20) {
+              if (isAhead) {
+                // Vehicle ahead in same lane - MUST maintain safe distance
                 canMoveToPosition = false;
                 break;
               }
-            } else if (distance < 20) {
-              // Different lanes but too close - prevent collision
-              canMoveToPosition = false;
-              break;
             }
+            // else: Different lanes, not opposing traffic - vehicles can pass safely
+            // No need to check further - they're on perpendicular paths
           }
         }
+        
+        // INTERSECTION RESERVATION SYSTEM - SIMPLIFIED
+        // Only reserve for TURNING vehicles to prevent turn conflicts
+        // Straight vehicles flow freely (no reservation needed)
+        let canEnterIntersection = true;
+        
+        const isTurning = vehicle.turnType !== 'straight';
+        
+        if (isTurning && (approachingIntersection || atIntersection)) {
+          const currentReservation = intersectionReservation.current;
+          
+          if (currentReservation === null) {
+            // Intersection is free - reserve it for this turning vehicle
+            if (approachingIntersection && canMove) {
+              intersectionReservation.current = vehicle.id;
+            }
+          } else if (currentReservation !== vehicle.id) {
+            // Another vehicle has reserved the intersection
+            const reservedVehicle = prev.find(v => v.id === currentReservation);
+            
+            if (!reservedVehicle) {
+              // Reserved vehicle no longer exists - clear reservation
+              intersectionReservation.current = null;
+            } else {
+              // Check if reserved vehicle has cleared the intersection
+              const reservedCleared = reservedVehicle.hasTurned && 
+                (Math.abs(reservedVehicle.x - CENTER_X) > INTERSECTION_SIZE/2 + 30 ||
+                 Math.abs(reservedVehicle.y - CENTER_Y) > INTERSECTION_SIZE/2 + 30);
+              
+              if (reservedCleared) {
+                // Reserved vehicle has cleared - release reservation
+                intersectionReservation.current = null;
+              } else {
+                // Intersection still reserved - this turning vehicle must WAIT
+                canEnterIntersection = false;
+              }
+            }
+          }
+          // else: This vehicle has the reservation - can proceed
+        }
+        // Straight vehicles: canEnterIntersection remains true (no reservation check)
         
         // Decision logic
         if (atStopLine && !canMove) {
           // Stop at stop line if red light
+          newWaitingTime = vehicle.waitingTime + 1;
+          // Don't update position
+        } else if (!canEnterIntersection) {
+          // Intersection is reserved by another turning vehicle - WAIT
           newWaitingTime = vehicle.waitingTime + 1;
           // Don't update position
         } else if (!canMoveToPosition) {
@@ -466,6 +569,15 @@ const TrafficSimulatorV2: React.FC = () => {
               case 'East': currentLane = 'E1'; break; // E1 is outgoing for East
               case 'West': currentLane = 'W1'; break; // W1 is outgoing for West
             }
+          }
+          
+          // Clear intersection reservation when vehicle has exited intersection area
+          const hasExitedIntersection = hasTurned && 
+            (Math.abs(newX - CENTER_X) > INTERSECTION_SIZE/2 + 15 ||
+             Math.abs(newY - CENTER_Y) > INTERSECTION_SIZE/2 + 15);
+          
+          if (hasExitedIntersection && intersectionReservation.current === vehicle.id) {
+            intersectionReservation.current = null;
           }
         }
         
@@ -728,6 +840,7 @@ const TrafficSimulatorV2: React.FC = () => {
     setCurrentPhase('EW');
     frameCountRef.current = 0;
     vehicleIdRef.current = 0;
+    intersectionReservation.current = null; // Clear intersection reservation
     
     // Reset signals
     setTrafficSignals([
@@ -745,75 +858,20 @@ const TrafficSimulatorV2: React.FC = () => {
   
   return (
     <div className="traffic-simulator">
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '10px',
-        justifyContent: 'center',
-        marginBottom: '1rem'
-      }}>
-        <canvas
-          ref={canvasRef}
-          width={canvasWidth}
-          height={CANVAS_HEIGHT}
-          style={{ 
-            border: '2px solid #333',
-            background: '#1a1a1a',
-            borderRadius: '8px',
-            display: 'block',
-            cursor: 'ew-resize'
-          }}
-        />
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: '8px',
-          color: '#fff'
-        }}>
-          <button 
-            onClick={() => setCanvasWidth(prev => Math.min(1200, prev + 50))}
-            style={{
-              padding: '8px 12px',
-              background: '#3498db',
-              border: 'none',
-              borderRadius: '4px',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '18px'
-            }}
-          >
-            ▶
-          </button>
-          <button 
-            onClick={() => setCanvasWidth(prev => Math.max(400, prev - 50))}
-            style={{
-              padding: '8px 12px',
-              background: '#3498db',
-              border: 'none',
-              borderRadius: '4px',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '18px'
-            }}
-          >
-            ◀
-          </button>
-          <div style={{ 
-            fontSize: '12px', 
-            textAlign: 'center',
-            color: '#95a5a6'
-          }}>
-            {canvasWidth}px
-          </div>
+      {/* Left Control Panel */}
+      <div className="simulator-layout-left">
+        <div className="control-panel-header">
+          <h3>Traffic Control System</h3>
+          <div className="phase-indicator">Phase: {currentPhase}</div>
         </div>
-      </div>
-      
-      <div className="simulator-controls">
-        <div className="main-controls">
-          <div className="control-group">
+        
+        <div className="control-section">
+          <h4>Simulation</h4>
+          <div className="control-section-buttons">
             <button 
               className={`control-btn primary ${isRunning ? 'pause' : 'play'}`}
               onClick={isRunning ? handlePause : handleStart}
+              style={{ width: '100%' }}
             >
               {isRunning ? <Pause size={18} /> : <Play size={18} />}
               {isRunning ? 'Pause' : 'Start'}
@@ -822,27 +880,115 @@ const TrafficSimulatorV2: React.FC = () => {
             <button 
               className="control-btn secondary reset"
               onClick={handleReset}
+              style={{ width: '100%' }}
             >
               <RotateCcw size={18} />
               Reset
             </button>
           </div>
-          
-          <div className="control-group">
-            <div className="speed-control">
-              <label>Speed: {speed}x</label>
-              <input
-                type="range"
-                min="0.5"
-                max="3"
-                step="0.5"
-                value={speed}
-                onChange={(e) => setSpeed(parseFloat(e.target.value))}
-                className="speed-slider"
-              />
+        </div>
+        
+        <div className="control-section">
+          <h4>Speed Control</h4>
+          <div style={{ textAlign: 'center', fontSize: '1.2rem', color: '#60a5fa', marginBottom: '0.5rem' }}>
+            {speed}x
+          </div>
+          <input
+            type="range"
+            min="0.5"
+            max="3"
+            step="0.5"
+            value={speed}
+            onChange={(e) => setSpeed(parseFloat(e.target.value))}
+            className="speed-slider"
+            style={{ width: '100%' }}
+          />
+        </div>
+        
+        <div className="control-section">
+          <h4>Canvas Width</h4>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
+            <button 
+              onClick={() => setCanvasWidth(prev => Math.max(400, prev - 50))}
+              style={{
+                padding: '8px 12px',
+                background: 'rgba(138, 43, 226, 0.2)',
+                border: '1px solid rgba(138, 43, 226, 0.4)',
+                borderRadius: '4px',
+                color: '#a855f7',
+                cursor: 'pointer',
+                fontSize: '16px',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              ◀
+            </button>
+            <span style={{ fontSize: '0.9rem', color: '#60a5fa', fontWeight: '500' }}>
+              {canvasWidth}px
+            </span>
+            <button 
+              onClick={() => setCanvasWidth(prev => Math.min(1200, prev + 50))}
+              style={{
+                padding: '8px 12px',
+                background: 'rgba(138, 43, 226, 0.2)',
+                border: '1px solid rgba(138, 43, 226, 0.4)',
+                borderRadius: '4px',
+                color: '#a855f7',
+                cursor: 'pointer',
+                fontSize: '16px',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              ▶
+            </button>
+          </div>
+        </div>
+        
+        <div className="control-section">
+          <h4>Traffic Density</h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0', borderBottom: '1px solid rgba(138, 43, 226, 0.2)' }}>
+              <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>North:</span>
+              <span style={{ color: '#60a5fa', fontWeight: '600' }}>
+                {vehicles.filter(v => v.fromDirection === 'North' && !v.hasTurned).length}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0', borderBottom: '1px solid rgba(138, 43, 226, 0.2)' }}>
+              <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>South:</span>
+              <span style={{ color: '#60a5fa', fontWeight: '600' }}>
+                {vehicles.filter(v => v.fromDirection === 'South' && !v.hasTurned).length}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0', borderBottom: '1px solid rgba(138, 43, 226, 0.2)' }}>
+              <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>East:</span>
+              <span style={{ color: '#60a5fa', fontWeight: '600' }}>
+                {vehicles.filter(v => v.fromDirection === 'East' && !v.hasTurned).length}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0' }}>
+              <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>West:</span>
+              <span style={{ color: '#60a5fa', fontWeight: '600' }}>
+                {vehicles.filter(v => v.fromDirection === 'West' && !v.hasTurned).length}
+              </span>
             </div>
           </div>
         </div>
+      </div>
+      
+      {/* Canvas Area */}
+      <div className="simulator-canvas-area">
+        <canvas
+          ref={canvasRef}
+          width={canvasWidth}
+          height={CANVAS_HEIGHT}
+          style={{ 
+            border: '2px solid rgba(138, 43, 226, 0.3)',
+            background: '#1a1a1a',
+            borderRadius: '8px',
+            display: 'block',
+            boxShadow: '0 4px 20px rgba(138, 43, 226, 0.2)'
+          }}
+        />
       </div>
     </div>
   );
