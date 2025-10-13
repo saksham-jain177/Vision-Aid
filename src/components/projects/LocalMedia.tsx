@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import * as faceapi from 'face-api.js';
+import * as faceapi from '@vladmandic/face-api';
 import './LocalMedia.css';
 
 interface LocalMediaProps {

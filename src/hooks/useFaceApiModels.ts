@@ -1,22 +1,89 @@
 import { useState, useEffect } from 'react';
-import * as faceapi from 'face-api.js';
+import * as faceapi from '@vladmandic/face-api';
+import * as tf from '@tensorflow/tfjs';
+import '@tensorflow/tfjs-core';
+import '@tensorflow/tfjs-converter';
 import { getModelFromIndexedDB, saveModelToIndexedDB, modelExistsInIndexedDB } from '../utils/indexedDBHelper';
+
+// Global backend initialization state
+let backendInitialized = false;
+let preferredBackend: 'webgl' | 'cpu' = 'webgl';
+
+// Ensure backend is ready - call this before any face detection operation
+export const ensureBackendReady = async (): Promise<void> => {
+  try {
+    // Use the explicitly installed TensorFlow.js
+    await tf.ready();
+    const currentBackend = tf.getBackend();
+    console.log(`[Backend Check] Current backend: ${currentBackend}`);
+    
+    // Always verify with a test operation
+    try {
+      const testTensor = tf.scalar(1);
+      await testTensor.data();
+      testTensor.dispose();
+      console.log(`[Backend Check] Backend test passed, backend is ready`);
+      return; // Backend is working
+    } catch (testError) {
+      console.warn('[Backend Check] Backend test failed, reinitializing...', testError);
+      // Fall through to reinitialize
+    }
+  } catch (error) {
+    console.warn('[Backend Check] Error checking backend, reinitializing...', error);
+  }
+  
+  // Backend test failed or doesn't exist, reinitialize
+  await initializeBackend();
+};
 
 // Initialize TensorFlow.js backend
 const initializeBackend = async () => {
   try {
-    // Set the backend to 'webgl' for better performance
-    await faceapi.tf.setBackend('webgl');
-    // Wait for TensorFlow to be ready
-    await new Promise(resolve => setTimeout(resolve, 100));
-    console.log('TensorFlow.js backend initialized successfully');
+    // Try preferred backend first
+    console.log(`Initializing TensorFlow.js backend (${preferredBackend})...`);
+    await tf.setBackend(preferredBackend);
+    await tf.ready(); // Ensure backend is fully initialized
+    
+    // Force backend initialization with a test operation
+    const testTensor = tf.scalar(1);
+    await testTensor.data();
+    testTensor.dispose();
+    
+    // Verify backend is set
+    const verifiedBackend = tf.getBackend();
+    if (verifiedBackend === preferredBackend) {
+      console.log(`✓ ${preferredBackend.toUpperCase()} backend initialized successfully`);
+      backendInitialized = true;
+    } else {
+      throw new Error(`Backend mismatch: expected ${preferredBackend}, got ${verifiedBackend}`);
+    }
   } catch (error) {
-    console.warn('WebGL backend failed, falling back to CPU:', error);
-    // Fallback to CPU backend
-    await faceapi.tf.setBackend('cpu');
-    // Wait for TensorFlow to be ready
-    await new Promise(resolve => setTimeout(resolve, 100));
-    console.log('TensorFlow.js CPU backend initialized');
+    // If preferred backend failed and it was WebGL, try CPU
+    if (preferredBackend === 'webgl') {
+      console.warn('WebGL failed, trying CPU...', error);
+      preferredBackend = 'cpu';
+      try {
+        await tf.setBackend('cpu');
+        await tf.ready();
+        const testTensor = tf.scalar(1);
+        await testTensor.data();
+        testTensor.dispose();
+        
+        const verifiedBackend = tf.getBackend();
+        if (verifiedBackend === 'cpu') {
+          console.log('✓ CPU backend initialized successfully');
+          backendInitialized = true;
+        } else {
+          throw new Error(`CPU backend verification failed: got ${verifiedBackend}`);
+        }
+      } catch (cpuError) {
+        console.error('❌ Both WebGL and CPU backends failed:', cpuError);
+        throw new Error('Failed to initialize any TensorFlow.js backend');
+      }
+    } else {
+      console.error('❌ CPU backend failed:', error);
+      throw new Error('Failed to initialize CPU backend');
+    }
   }
 };
 

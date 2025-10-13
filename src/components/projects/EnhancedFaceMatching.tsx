@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import * as faceapi from 'face-api.js';
+import * as faceapi from '@vladmandic/face-api';
 import { FaceCluster, enhancedFaceMatching } from '../../utils/faceClusteringUtils';
 
 interface FaceEncoding {

@@ -5,7 +5,7 @@
  * helping to group multiple images of the same person together.
  */
 
-import * as faceapi from 'face-api.js';
+import * as faceapi from '@vladmandic/face-api';
 
 /**
  * Interface for a face descriptor with metadata

@@ -80,50 +80,76 @@ const UrbanTrafficDynamics: React.FC = () => {
       case 'about':
         return (
           <div className="about-content">
-            <h3>About Urban Traffic Dynamics</h3>
-            <div className="about-sections">
-              <section>
-                <h4>🚦 Smart Traffic Management</h4>
-                <p>
-                  Our AI-powered system uses computer vision to analyze real-time traffic patterns 
-                  and dynamically adjust traffic light timing to optimize flow and reduce congestion.
-                </p>
-              </section>
-              
-              <section>
-                <h4>🤖 AI Optimization</h4>
-                <p>
-                  Advanced machine learning algorithms continuously learn from traffic patterns 
-                  to make intelligent decisions about signal timing, reducing wait times by up to 42%.
-                </p>
-              </section>
-              
-              <section>
-                <h4>📊 Real-time Analytics</h4>
-                <p>
-                  Comprehensive monitoring and reporting system provides insights into traffic flow, 
-                  congestion levels, and system performance for continuous improvement.
-                </p>
-              </section>
-              
-              <section>
-                <h4>🌱 Environmental Impact</h4>
-                <p>
-                  By reducing idle time and improving traffic flow, our system contributes to 
-                  significant fuel savings and CO2 emission reductions, making cities more sustainable.
-                </p>
-              </section>
+            <div className="about-header">
+              <h3>Urban Traffic Dynamics</h3>
+              <p className="about-subtitle">Real-time Traffic Simulation & Optimization System</p>
             </div>
             
-            <div className="technology-stack">
-              <h4>Technology Stack</h4>
-              <div className="tech-tags">
-                <span className="tech-tag">YOLOv8</span>
-                <span className="tech-tag">Computer Vision</span>
-                <span className="tech-tag">TensorFlow</span>
-                <span className="tech-tag">Real-time Detection</span>
-                <span className="tech-tag">Traffic Analysis</span>
-                <span className="tech-tag">React</span>
+            <div className="feature-grid">
+              <div className="feature-card">
+                <div className="feature-icon">🚦</div>
+                <h4>Density-Based Signal Timing</h4>
+                <p>Allocates green time based on vehicle count: 20s base + 3s per vehicle, with priority adjustments for congested lanes.</p>
+              </div>
+              
+              <div className="feature-card">
+                <div className="feature-icon">🎯</div>
+                <h4>Smart Collision Avoidance</h4>
+                <p>Lane-aware detection ensures opposing traffic flows freely while maintaining safe 30px distance in same-lane vehicles.</p>
+              </div>
+              
+              <div className="feature-card">
+                <div className="feature-icon">🔄</div>
+                <h4>Real-World Traffic Rules</h4>
+                <p>Implements right-turn-only policy (70% straight, 30% right) to eliminate left-turn conflicts with oncoming traffic.</p>
+              </div>
+            </div>
+            
+            <div className="tech-stack-section">
+              <h4>Implementation Stack</h4>
+              <div className="tech-circle-container">
+                <div className="tech-circle-center">
+                  <span className="center-label">Built With</span>
+                </div>
+                <div className="tech-pill-circle tech-pill-1">
+                  <span className="tech-pill core">TypeScript</span>
+                </div>
+                <div className="tech-pill-circle tech-pill-2">
+                  <span className="tech-pill core">React 19</span>
+                </div>
+                <div className="tech-pill-circle tech-pill-3">
+                  <span className="tech-pill core">Canvas API</span>
+                </div>
+                <div className="tech-pill-circle tech-pill-4">
+                  <span className="tech-pill engine">Round-Robin</span>
+                </div>
+                <div className="tech-pill-circle tech-pill-5">
+                  <span className="tech-pill engine">Density Logic</span>
+                </div>
+                <div className="tech-pill-circle tech-pill-6">
+                  <span className="tech-pill algo">Lane Physics</span>
+                </div>
+                <div className="tech-pill-circle tech-pill-7">
+                  <span className="tech-pill ui">Framer Motion</span>
+                </div>
+                <div className="tech-pill-circle tech-pill-8">
+                  <span className="tech-pill ui">Lucide Icons</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="project-info">
+              <div className="info-card">
+                <h5>Version</h5>
+                <p>v1.2.0</p>
+              </div>
+              <div className="info-card">
+                <h5>Last Updated</h5>
+                <p>October 2025</p>
+              </div>
+              <div className="info-card">
+                <h5>Status</h5>
+                <p className="status-active">Active Development</p>
               </div>
             </div>
           </div>

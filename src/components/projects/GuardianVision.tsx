@@ -7,9 +7,9 @@ import {
   Camera,
   X
 } from 'lucide-react';
-import * as faceapi from 'face-api.js';
+import * as faceapi from '@vladmandic/face-api';
 import './GuardianVision.css';
-import { useFaceApiModels } from '../../hooks/useFaceApiModels';
+import { useFaceApiModels, ensureBackendReady } from '../../hooks/useFaceApiModels';
 import LocalMedia from './LocalMedia';
 // Import Dashboard component
 import DashboardComponent from './Dashboard';
@@ -362,6 +362,9 @@ const GuardianVision: React.FC = () => {
         maxResults: 15
       });
 
+      // Ensure backend is ready before face detection
+      await ensureBackendReady();
+      
       // Detect faces
       // Increment frame counter
       frameCountRef.current += 1;
@@ -1195,10 +1198,33 @@ const GuardianVision: React.FC = () => {
         console.log('Enable data augmentation in Settings > Advanced Settings for better face recognition');
       }
 
-      // Process original image first
-      const originalDetections = await faceapi.detectAllFaces(img, detectionOptions)
-        .withFaceLandmarks()
-        .withFaceDescriptors();
+      // Process original image first with aggressive backend initialization
+      let originalDetections;
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        try {
+          // Ensure backend is ready before detection
+          await ensureBackendReady();
+          console.log(`[Detection Attempt ${retryCount + 1}] Backend ready, starting detection...`);
+          
+          originalDetections = await faceapi.detectAllFaces(img, detectionOptions)
+            .withFaceLandmarks()
+            .withFaceDescriptors();
+          console.log(`[Detection Attempt ${retryCount + 1}] Success! Detected ${originalDetections.length} face(s)`);
+          break; // Success, exit retry loop
+        } catch (error) {
+          retryCount++;
+          console.error(`[Detection Attempt ${retryCount}] Failed:`, error);
+          if (retryCount >= maxRetries) {
+            console.error('❌ Failed to detect faces after 3 attempts');
+            throw error;
+          }
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 300));
+        }
+      }
 
       if (originalDetections.length === 0) {
         console.warn(`No faces detected in original reference image ${index + 1}`);
