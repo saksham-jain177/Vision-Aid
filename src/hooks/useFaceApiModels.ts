@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import * as faceapi from '@vladmandic/face-api';
-import * as tf from '@tensorflow/tfjs';
-import '@tensorflow/tfjs-core';
-import '@tensorflow/tfjs-converter';
 import { getModelFromIndexedDB, saveModelToIndexedDB, modelExistsInIndexedDB } from '../utils/indexedDBHelper';
+
+// Use faceapi's TensorFlow.js instance to prevent duplicate kernel warnings
+// @ts-ignore - faceapi.tf is available at runtime
+const tf = faceapi.tf;
 
 // Global backend initialization state
 let backendInitialized = false;
@@ -13,12 +14,15 @@ let preferredBackend: 'webgl' | 'cpu' = 'webgl';
 export const ensureBackendReady = async (): Promise<void> => {
   try {
     // Use the explicitly installed TensorFlow.js
+    // @ts-ignore
     await tf.ready();
+    // @ts-ignore
     const currentBackend = tf.getBackend();
     console.log(`[Backend Check] Current backend: ${currentBackend}`);
     
     // Always verify with a test operation
     try {
+      // @ts-ignore
       const testTensor = tf.scalar(1);
       await testTensor.data();
       testTensor.dispose();
@@ -41,15 +45,19 @@ const initializeBackend = async () => {
   try {
     // Try preferred backend first
     console.log(`Initializing TensorFlow.js backend (${preferredBackend})...`);
+    // @ts-ignore
     await tf.setBackend(preferredBackend);
+    // @ts-ignore
     await tf.ready(); // Ensure backend is fully initialized
     
     // Force backend initialization with a test operation
+    // @ts-ignore
     const testTensor = tf.scalar(1);
     await testTensor.data();
     testTensor.dispose();
     
     // Verify backend is set
+    // @ts-ignore
     const verifiedBackend = tf.getBackend();
     if (verifiedBackend === preferredBackend) {
       console.log(`✓ ${preferredBackend.toUpperCase()} backend initialized successfully`);
@@ -63,12 +71,16 @@ const initializeBackend = async () => {
       console.warn('WebGL failed, trying CPU...', error);
       preferredBackend = 'cpu';
       try {
+        // @ts-ignore
         await tf.setBackend('cpu');
+        // @ts-ignore
         await tf.ready();
+        // @ts-ignore
         const testTensor = tf.scalar(1);
         await testTensor.data();
         testTensor.dispose();
         
+        // @ts-ignore
         const verifiedBackend = tf.getBackend();
         if (verifiedBackend === 'cpu') {
           console.log('✓ CPU backend initialized successfully');

@@ -1,231 +1,217 @@
-# VisionAid - Intelligent Urban Infrastructure Platform 🌆
+# VisionAid - AI-Powered Computer Vision Platform 🌆
 
 [![React](https://img.shields.io/badge/React-19.0.0-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-blue.svg)](https://www.typescriptlang.org/)
 [![Three.js](https://img.shields.io/badge/Three.js-0.174.0-green.svg)](https://threejs.org/)
-[![face-api.js](https://img.shields.io/badge/face--api.js-0.22.2-orange.svg)](https://github.com/justadudewhohacks/face-api.js/)
+[![face-api](https://img.shields.io/badge/%40vladmandic%2Fface--api-1.7.13-orange.svg)](https://github.com/vladmandic/face-api)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## 🚀 Overview
 
-VisionAid is a cutting-edge urban infrastructure management platform that leverages AI and computer vision to revolutionize city operations and public safety. Our platform provides intelligent solutions for traffic management and missing person detection, creating smarter, safer urban environments.
-
-[Live Demo](https://vision-aid.vercel.app) | [Documentation](https://github.com/shichancoder/Vision-Aid/wiki)
-
-![VisionAid Platform Screenshot](public/screenshot.png)
+VisionAid is an intelligent computer vision platform that combines AI-powered face recognition with traffic simulation systems. Built with React, TypeScript, and modern web technologies, it demonstrates real-world applications of computer vision and machine learning.
 
 ## ✨ Features
 
-- **3D Interactive Visualization**: Immersive urban infrastructure visualization using Three.js
-- **Real-time Face Recognition**: Advanced facial recognition for missing person detection
-- **AI-Powered Assistant**: Intelligent chatbot for platform navigation and assistance
-- **Day/Night Mode**: Adaptive interface with dynamic theme switching
+- **3D Interactive Visualization**: Immersive Three.js-powered animations
+- **Real-time Face Recognition**: Advanced facial detection and matching
+- **AI Chatbot**: Intelligent assistant powered by OpenRouter API
+- **Traffic Simulation**: Density-based adaptive signal timing
 - **Responsive Design**: Seamless experience across all devices
-- **Interactive Dashboard**: Real-time analytics and performance metrics
-- **Multiple Video Sources**: Support for webcam, CCTV, drone feeds, and local media files
+- **Offline Support**: IndexedDB caching for models and data
+- **Multiple Video Sources**: Webcam, CCTV, drone, and local media support
 
 ## 🚀 Featured Projects
 
 ### Urban Traffic Dynamics
 
-A real-time traffic simulation and optimization system that implements density-based round-robin scheduling to manage traffic signals at intersections. The system dynamically measures traffic density and allocates green light duration proportionally, reducing average waiting times by up to 42%.
+Real-time traffic simulation implementing density-based round-robin scheduling for intelligent traffic signal management.
 
-**Density Measurement & Signal Control:**
+**Key Features:**
+- **Dynamic Signal Timing**: Adjusts green light duration based on real-time vehicle density
+- **Round-Robin Scheduling**: Alternates between North-South and East-West axes
+- **Priority System**: Congested axes get +30% green time when density ratio > 2:1
+- **Collision Avoidance**: Safe distance maintenance and lane discipline
+- **Traffic Rules**: 70% straight traffic, 30% right turns (no left turns)
 
-The simulator counts vehicles waiting at each direction (`North`, `South`, `East`, `West`) that haven't crossed the intersection yet. These counts are aggregated into two axes:
-
+**Density Calculation:**
 ```javascript
 NS Density = North vehicles + South vehicles
 EW Density = East vehicles + West vehicles
+Green Duration = min(60s, max(10s, 20s + (Density × 3s)))
 ```
-
-**Round-Robin Phase Scheduling:**
-
-Traffic signals alternate between NS (North-South) and EW (East-West) phases:
-
-1. **Dynamic Timing Formula:**
-   ```
-   Base Time = 20 seconds
-   Time Per Vehicle = 3 seconds
-   Green Duration = min(60s, max(10s, Base Time + (Density × Time Per Vehicle)))
-   ```
-
-2. **Priority Adjustments:**
-   - When density ratio > 2:1, the congested axis receives **+30% green time**
-   - The less congested axis receives **-30% green time**
-   - Example: If NS has 12 vehicles and EW has 4 vehicles (3:1 ratio):
-     * NS green time increases by 30%
-     * EW green time decreases by 30%
-
-3. **Reduced Waiting Times:**
-   - Low-density lanes get shorter green times (min 10s), reducing idle waiting
-   - High-density lanes get extended green times (up to 60s), clearing congestion faster
-   - Adaptive timing prevents fixed-cycle inefficiencies where empty lanes hold green unnecessarily
-
-**Traffic Flow Rules:**
-
-- **70% straight traffic, 30% right turns** - No left turns to prevent oncoming traffic conflicts
-- **Lane-specific collision avoidance** - Opposing traffic in parallel lanes flows freely
-- **Safe distance maintenance** - Vehicles maintain 30px separation in same lane
 
 ### Guardian Vision
 
-An advanced facial recognition system for detecting, locating, and finding missing people through a network of drones, CCTVs, webcams, and local media files. Guardian Vision leverages face-api.js to match reference images of missing persons against real-time video feeds with high recognition accuracy.
+Advanced facial recognition system for detecting and locating missing persons through multiple video sources.
 
 **Key Features:**
-
 - Multi-source video processing (CCTV, drones, webcams, local files)
-- Real-time facial recognition with adjustable matching threshold
-- Geolocation tracking and mapping
-- Facial landmark detection and visualization
+- Real-time facial recognition with adjustable threshold
+- Multiple reference image support with data augmentation
 - Privacy mode for non-matching faces
+- Geolocation tracking and mapping
 - Comprehensive analytics dashboard
-- Model caching for offline operation
-- Multiple reference image support for improved accuracy
+- Offline model caching
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 19.0.0 with TypeScript 5.7.2
-- **Styling**: Custom CSS (No Tailwind)
-- **3D Graphics**: Three.js 0.174.0
-- **Face Recognition**: face-api.js 0.20.0
-- **Icons**: Lucide React 0.477.0 + React Icons 5.5.0
-- **Animations**: Framer Motion 12.4.10
-- **Routing**: React Router DOM 7.2.0
-- **AI Integration**: OpenRouter API
-- **Build Tool**: Vite 6.2.0
-- **Offline Storage**: IndexedDB (via idb 8.0.2)
-- **Email**: @emailjs/browser 4.4.1
-- **Layout**: react-masonry-css 1.0.16
+### Core Technologies
+- **React** 19.0.0 - UI framework
+- **TypeScript** 5.7.2 - Type-safe JavaScript
+- **Vite** 6.2.0 - Build tool and dev server
+
+### Computer Vision & AI
+- **@vladmandic/face-api** 1.7.13 - Facial recognition (TensorFlow.js-based)
+- **Three.js** 0.174.0 - 3D graphics and animations
+- **OpenRouter API** - AI chatbot integration
+
+### UI & Styling
+- **Custom CSS** - No framework dependencies
+- **Framer Motion** 12.4.10 - Smooth animations
+- **Lucide React** 0.477.0 - Modern icons
+- **React Icons** 5.5.0 - Icon library
+
+### State & Routing
+- **React Router DOM** 7.2.0 - Client-side routing
+
+### Utilities
+- **idb** 8.0.2 - IndexedDB wrapper for offline storage
+- **@emailjs/browser** 4.4.1 - Contact form integration
+- **react-masonry-css** 1.0.16 - Responsive grid layouts
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-
-- Node.js (v18 or higher)
+- Node.js v18+ 
 - npm or yarn
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone the repository:**
+```bash
+git clone https://github.com/saksham-jain177/Vision-Aid.git
+cd Vision-Aid
+```
 
-  ```bash
-  git clone https://github.com/shichancoder/Vision-Aid.git
-  cd Vision-Aid
-  ```
+2. **Install dependencies:**
+```bash
+npm install
+```
 
-2. Install dependencies:
+3. **Create `.env` file** (optional - for chatbot):
+```env
+VITE_OPENROUTER_API_KEY=your_api_key_here
+```
 
-  ```bash
-  npm install
-  # or
-  yarn install
-  ```
-
-3. Create a `.env` file in the root directory (optional for chatbot functionality):
-
-  ```env
-  VITE_OPENROUTER_API_KEY=your_api_key_here
-  ```
-
-4. Start the development server:
-
-  ```bash
-  npm run dev
-  # or
-  yarn dev
-  ```
+4. **Start development server:**
+```bash
+npm run dev
+```
 
 Visit `http://localhost:3000` to view the application.
 
 ## 🔧 Available Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production (Vite only)
-- `npm run build:check` - Build with TypeScript checking
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Run ESLint with auto-fix
-- `npm run preview` - Preview production build
-- `npm run audit` - Check for security vulnerabilities
-- `npm run clean` - Clean build artifacts
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run build:check` | Build with TypeScript type checking |
+| `npm run lint` | Run ESLint |
+| `npm run lint:fix` | Run ESLint with auto-fix |
+| `npm run preview` | Preview production build |
+| `npm run audit` | Security vulnerability check |
+| `npm run clean` | Clean build artifacts |
 
 ## 📁 Project Structure
 
-```text
+```
 vision-aid/
 ├── public/
-│   ├── weights/                # Face detection model weights
-│   └── assets/                 # Static assets
+│   └── weights/              # Face detection model weights
 ├── src/
-│   ├── assets/
-│   │   └── icons/             # Custom SVG icons
 │   ├── components/
-│   │   ├── projects/          # Project-specific components
-│   │   │   ├── GuardianVision.tsx    # Missing person detection system
-│   │   │   ├── UrbanTrafficDynamics.tsx  # Traffic management system
-│   │   │   ├── Dashboard.tsx  # Analytics dashboard
-│   │   │   ├── LocalMedia.tsx # Local media file processor
-│   │   │   ├── Settings.tsx   # User settings component
-│   │   │   └── LocationIndicator.tsx  # Geolocation display
-│   │   ├── About.tsx          # About page
-│   │   ├── Chatbot.tsx        # AI assistant
-│   │   ├── Contact.tsx        # Contact form
-│   │   ├── Projects.tsx       # Project showcase
-│   │   ├── Toast.tsx          # Notification component
-│   │   └── VisionAidHomepage.tsx  # Landing page
+│   │   ├── projects/
+│   │   │   ├── GuardianVision.tsx         # Face recognition system
+│   │   │   ├── UrbanTrafficDynamics.tsx   # Traffic simulation
+│   │   │   ├── TrafficSimulatorV2.tsx     # Traffic simulator engine
+│   │   │   ├── Dashboard.tsx              # Analytics dashboard
+│   │   │   ├── LocalMedia.tsx             # Media file processor
+│   │   │   └── Settings.tsx               # User settings
+│   │   ├── About.tsx                      # About page
+│   │   ├── Chatbot.tsx                    # AI assistant
+│   │   ├── Contact.tsx                    # Contact form (EmailJS)
+│   │   ├── Projects.tsx                   # Project showcase
+│   │   └── VisionAidHomepage.tsx          # Landing page
 │   ├── hooks/
-│   │   └── useFaceApiModels.ts  # Custom hook for face-api.js models
+│   │   └── useFaceApiModels.ts            # Face-api model loader
 │   ├── services/
-│   │   └── openRouterService.ts  # AI chatbot service
+│   │   ├── openRouterService.ts           # AI chatbot service
+│   │   └── projectSuggestionService.ts    # Project suggestions
 │   ├── utils/
-│   │   └── indexedDBHelper.ts  # IndexedDB utilities for model caching
-│   ├── App.tsx                # Main application component
-│   └── main.tsx               # Application entry point
-└── package.json               # Project dependencies and scripts
+│   │   ├── indexedDBHelper.ts             # IndexedDB utilities
+│   │   ├── dataAugmentation.ts            # Image augmentation
+│   │   ├── faceClusteringUtils.ts         # Face clustering
+│   │   └── geocodingUtils.ts              # Geolocation utilities
+│   ├── App.tsx                            # Main app component
+│   └── main.tsx                           # Entry point
+└── package.json
 ```
 
-## 🔍 Guardian Vision Usage Guide
+## 🔍 Guardian Vision Usage
 
-### Reference Image Upload
+### 1. Upload Reference Images
+- Upload 3-5 clear photos of the person
+- Multiple angles improve accuracy
+- Click "Process" to extract facial features
 
-1. Upload 3-5 clear images of the person you're looking for
-2. The system works best with multiple reference images showing different angles
-3. Click "Process" to extract facial features
+### 2. Select Video Source
+- **CCTV**: Surveillance camera feeds
+- **Drone**: Aerial drone cameras
+- **Webcam**: Live camera testing
+- **Local Media**: Upload videos/images
 
-### Search Sources
+### 3. Configure Settings
+- **Match Threshold**: Adjust recognition sensitivity (0.4-0.6 recommended)
+- **Privacy Mode**: Blur non-matching faces
+- **Show Confidence**: Display match percentages
+- **Model Caching**: Enable offline mode
+- **Frame Skip**: Optimize performance
 
-Choose from multiple video sources to search for the missing person:
+### 4. View Analytics
+- Total searches and matches
+- Success rate and accuracy
+- Search history with locations
+- Processing time metrics
 
-- **CCTV**: Connect to surveillance camera feeds
-- **Drone**: Link to aerial drone cameras
-- **Local Media**: Upload videos or images for offline processing
+## 🚀 Deployment
 
-### Testing
+### Hosting Options
 
-- **Live Webcam**: Test the system using your device's camera
+**Recommended:** Vercel (optimal for Vite + React)
+- Automatic CI/CD from GitHub
+- Edge network for fast global access
+- Zero configuration needed
 
-### Settings
+**Alternative:** Render
+- Free tier available
+- Supports static sites
+- Requires manual build configuration
 
-- **Show Confidence Scores**: Display match percentage on detected faces
-- **Privacy Mode**: Blur non-matching faces for privacy protection
-- **Location Tracking**: Record location data with matches
-- **Model Caching**: Store face detection models locally for faster loading
-- **Match Threshold**: Adjust recognition sensitivity
-- **Frame Skip**: Process every Nth frame for performance optimization
+### Deploy to Vercel
+```bash
+npm install -g vercel
+vercel
+```
 
-### Dashboard
-
-Access comprehensive analytics including:
-
-- Total searches and matches found
-- Success rate and reference image count
-- Recent search history with timestamps and locations
-- Recognition accuracy metrics
-- Processing time statistics
+### Deploy to Render
+1. Connect GitHub repository
+2. Set build command: `npm run build`
+3. Set publish directory: `dist`
 
 ## 👥 Contributors
 
-- [Saksham Jain](https://github.com/saksham-jain177) - Lead Developer & CV Engineer
+- **[Saksham Jain](https://github.com/saksham-jain177)** - Lead Developer & CV Engineer
 
 Want to contribute? Check out our [Contributing Guidelines](CONTRIBUTING.md).
 
@@ -235,30 +221,31 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- [face-api.js](https://github.com/justadudewhohacks/face-api.js/) for facial recognition capabilities
-- [Three.js](https://threejs.org/) for 3D visualization
-- [OpenRouter](https://openrouter.ai/) for AI integration
-- [Lucide](https://lucide.dev/) for beautiful icons
-- All our contributors and supporters
+- [@vladmandic/face-api](https://github.com/vladmandic/face-api) - Maintained fork for facial recognition
+- [Three.js](https://threejs.org/) - 3D visualization library
+- [OpenRouter](https://openrouter.ai/) - AI API integration
+- [Lucide](https://lucide.dev/) - Beautiful icon set
+- [Framer Motion](https://www.framer.com/motion/) - Animation library
 
 ## 📞 Contact
 
 - **Developer**: Saksham Jain
 - **Email**: 177sakshamjain@gmail.com
 - **GitHub**: [@saksham-jain177](https://github.com/saksham-jain177)
-- **Project Link**: [https://github.com/saksham-jain177/Vision-Aid](https://github.com/saksham-jain177/Vision-Aid)
+- **Project**: [https://github.com/saksham-jain177/Vision-Aid](https://github.com/saksham-jain177/Vision-Aid)
 
-## 🚀 Roadmap
+## 🗺️ Roadmap
 
-- [x] Enhanced facial recognition with multiple reference images
-- [x] Privacy mode for non-matching faces
-- [x] Comprehensive analytics dashboard
-- [x] Local media file processing
-- [ ] Improved side-profile face detection
+- [x] Multi-reference image support
+- [x] Privacy mode and blurring
+- [x] Analytics dashboard
+- [x] Offline model caching
+- [x] Traffic density simulation
+- [ ] Enhanced side-profile detection
 - [ ] Real-time alert system
-- [ ] Integration with public safety databases
-- [ ] Multi-city support
+- [ ] Multi-city traffic integration
+- [ ] Cloud deployment optimization
 
 ---
 
-<p align="center">Made with ❤️ by the VisionAid Team</p>
+<p align="center">Made with ❤️ by Saksham Jain</p>

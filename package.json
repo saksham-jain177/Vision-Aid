@@ -25,9 +25,6 @@
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
-    "@tensorflow/tfjs": "^3.11.0",
-    "@tensorflow/tfjs-converter": "^3.11.0",
-    "@tensorflow/tfjs-core": "^3.11.0",
     "@types/three": "^0.174.0",
     "@vladmandic/face-api": "^1.7.13",
     "framer-motion": "^12.4.10",

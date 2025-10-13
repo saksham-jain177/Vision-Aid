@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaUsers, FaLightbulb, FaHandHoldingHeart, FaEye, FaGithub, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
+import { FaUsers, FaLightbulb, FaHandHoldingHeart, FaEye, FaGithub, FaLinkedin, FaTwitter, FaInstagram, FaRocket, FaFlask, FaCogs, FaCheckCircle } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import { Globe, Sun, Moon, ArrowRight } from 'lucide-react';
+import { Globe, Sun, Moon, ArrowRight, Lightbulb, Beaker, Code, Target } from 'lucide-react';
 import './About.css';
 import './ImpactSection.css';
 import Chatbot from './Chatbot';
@@ -268,19 +268,21 @@ const About: React.FC = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.2, type: "spring", stiffness: 100 }}
-              whileHover={{ scale: 1.01, transition: { duration: 0.2, ease: "easeOut" } }}
             >
               <motion.div 
-                className="timeline-content"
+                className="timeline-content inception"
                 whileHover={{ 
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
-                  borderColor: "var(--color-primary)",
-                  borderWidth: "2px",
-                  transition: { duration: 0.2, ease: "easeOut" }
+                  scale: 1.02,
+                  transition: { duration: 0.2 }
                 }}
               >
-                <h3>Project Inception</h3>
-                <p>Identifying the need for AI-driven traffic and security solutions.</p>
+                <div className="timeline-icon">
+                  <Lightbulb size={28} />
+                </div>
+                <div className="timeline-text">
+                  <h3>💡 Project Inception</h3>
+                  <p>AI-driven traffic and security solutions</p>
+                </div>
                 <div className="timeline-dot"></div>
               </motion.div>
             </motion.div>
@@ -291,19 +293,21 @@ const About: React.FC = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.4, type: "spring", stiffness: 100 }}
-              whileHover={{ scale: 1.01, transition: { duration: 0.2, ease: "easeOut" } }}
             >
               <motion.div 
-                className="timeline-content"
+                className="timeline-content research"
                 whileHover={{ 
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
-                  borderColor: "var(--color-primary)",
-                  borderWidth: "2px",
-                  transition: { duration: 0.2, ease: "easeOut" }
+                  scale: 1.02,
+                  transition: { duration: 0.2 }
                 }}
               >
-                <h3>Research & Development</h3>
-                <p>Extensive research and testing of innovative accessibility solutions</p>
+                <div className="timeline-icon">
+                  <Beaker size={28} />
+                </div>
+                <div className="timeline-text">
+                  <h3>🔬 Research & Development</h3>
+                  <p>Testing innovative accessibility solutions</p>
+                </div>
                 <div className="timeline-dot"></div>
               </motion.div>
             </motion.div>
@@ -314,19 +318,21 @@ const About: React.FC = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.6, type: "spring", stiffness: 100 }}
-              whileHover={{ scale: 1.01, transition: { duration: 0.2, ease: "easeOut" } }}
             >
               <motion.div 
-                className="timeline-content"
+                className="timeline-content implementation"
                 whileHover={{ 
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
-                  borderColor: "var(--color-primary)",
-                  borderWidth: "2px",
-                  transition: { duration: 0.2, ease: "easeOut" }
+                  scale: 1.02,
+                  transition: { duration: 0.2 }
                 }}
               >
-                <h3>Implementation</h3>
-                <p>Developing and refining our accessibility tools</p>
+                <div className="timeline-icon">
+                  <Code size={28} />
+                </div>
+                <div className="timeline-text">
+                  <h3>⚙️ Implementation</h3>
+                  <p>Building & refining accessibility tools</p>
+                </div>
                 <div className="timeline-dot"></div>
               </motion.div>
             </motion.div>
@@ -337,19 +343,21 @@ const About: React.FC = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.8, type: "spring", stiffness: 100 }}
-              whileHover={{ scale: 1.01, transition: { duration: 0.2, ease: "easeOut" } }}
             >
               <motion.div 
-                className="timeline-content"
+                className="timeline-content future"
                 whileHover={{ 
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
-                  borderColor: "var(--color-primary)",
-                  borderWidth: "2px",
-                  transition: { duration: 0.2, ease: "easeOut" }
+                  scale: 1.02,
+                  transition: { duration: 0.2 }
                 }}
               >
-                <h3>Future Vision</h3>
-                <p>Expanding our reach with continuous improvements, integrating cloud computing, and collaborating with city planners for smarter infrastructure.</p>
+                <div className="timeline-icon">
+                  <Target size={28} />
+                </div>
+                <div className="timeline-text">
+                  <h3>🚀 Future Vision</h3>
+                  <p>Cloud integration & smart city collaboration</p>
+                </div>
                 <div className="timeline-dot"></div>
               </motion.div>
             </motion.div>

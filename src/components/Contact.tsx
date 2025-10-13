@@ -6,6 +6,7 @@ import { Globe, Sun, Moon, MessageCircle, X, Send, ArrowRight } from 'lucide-rea
 import './Contact.css';
 import Chatbot from './Chatbot';
 import { useLocation } from 'react-router-dom';
+import emailjs from '@emailjs/browser';
 
 const Contact: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -17,7 +18,10 @@ const Contact: React.FC = () => {
     subject: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   
   const chatbotImageUrl = "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png";
 
@@ -57,27 +61,55 @@ const Contact: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Create mailto link with form data
-    const subject = encodeURIComponent(formData.subject);
-    const body = encodeURIComponent(
-      `Name: ${formData.name}\n` +
-      `Email: ${formData.email}\n\n` +
-      `Message:\n${formData.message}`
-    );
+    if (!formRef.current) return;
     
-    // Open email client with pre-filled data
-    window.open(`mailto:177sakshamjain@gmail.com?subject=${subject}&body=${body}`);
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
     
-    // Reset form
-    setFormData({
-      name: '',
-      email: '',
-      subject: '',
-      message: ''
-    });
-    
-    // Show success message (you could add a toast notification here)
-    alert('Email client opened! Please send the email to complete your message.');
+    try {
+      // EmailJS configuration - Replace these with your actual credentials
+      // Get free credentials at https://www.emailjs.com/
+      // SERVICE_ID: Your EmailJS service ID
+      // TEMPLATE_ID: Your EmailJS template ID
+      // PUBLIC_KEY: Your EmailJS public key
+      
+      await emailjs.sendForm(
+        'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
+        'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
+        formRef.current,
+        'YOUR_PUBLIC_KEY' // Replace with your EmailJS public key
+      );
+      
+      setSubmitStatus('success');
+      
+      // Reset form after successful submission
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      });
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSubmitStatus('idle'), 5000);
+    } catch (error) {
+      console.error('Email send failed:', error);
+      setSubmitStatus('error');
+      
+      // Fallback to mailto if EmailJS fails
+      const subject = encodeURIComponent(formData.subject);
+      const body = encodeURIComponent(
+        `Name: ${formData.name}\n` +
+        `Email: ${formData.email}\n\n` +
+        `Message:\n${formData.message}`
+      );
+      window.open(`mailto:177sakshamjain@gmail.com?subject=${subject}&body=${body}`);
+      
+      // Clear error message after 5 seconds
+      setTimeout(() => setSubmitStatus('idle'), 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const Header = () => {
@@ -257,7 +289,35 @@ const Contact: React.FC = () => {
           transition={{ duration: 0.7, delay: 0.2 }}
         >
           <h2 className="contact-form-title">Send us a message</h2>
-          <form onSubmit={handleSubmit} className="contact-form">
+          
+          {/* Status Messages */}
+          {submitStatus === 'success' && (
+            <div style={{ 
+              padding: '1rem', 
+              marginBottom: '1rem', 
+              backgroundColor: '#10b981', 
+              color: 'white', 
+              borderRadius: '8px',
+              textAlign: 'center'
+            }}>
+              ✅ Message sent successfully! We'll get back to you soon.
+            </div>
+          )}
+          
+          {submitStatus === 'error' && (
+            <div style={{ 
+              padding: '1rem', 
+              marginBottom: '1rem', 
+              backgroundColor: '#ef4444', 
+              color: 'white', 
+              borderRadius: '8px',
+              textAlign: 'center'
+            }}>
+              ⚠️ Failed to send. Opening email client as fallback...
+            </div>
+          )}
+          
+          <form ref={formRef} onSubmit={handleSubmit} className="contact-form">
             <div className="form-group">
               <motion.input
                 whileFocus={{ scale: 1.02 }}
@@ -307,10 +367,20 @@ const Contact: React.FC = () => {
               className="submit-button"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              disabled={isSubmitting}
+              style={{ opacity: isSubmitting ? 0.7 : 1 }}
             >
-              Send Message
+              {isSubmitting ? 'Sending...' : 'Send Message'}
               <Send className="send-icon" size={18} />
             </motion.button>
+            <p style={{ 
+              marginTop: '1rem', 
+              fontSize: '0.85rem', 
+              color: 'var(--text-secondary)',
+              textAlign: 'center'
+            }}>
+              💡 Note: Configure EmailJS credentials in Contact.tsx to enable direct email sending
+            </p>
           </form>
         </motion.section>
 

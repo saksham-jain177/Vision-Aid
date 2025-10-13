@@ -140,7 +140,7 @@
 .timeline-title {
   text-align: center;
   font-size: 2.5rem;
-  margin-bottom: 3rem;
+  margin-bottom: 4rem;
   color: var(--text-primary);
 }
 
@@ -154,19 +154,19 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 2px;
+  width: 3px;
   height: 100%;
   background: linear-gradient(to bottom,
     transparent,
-    var(--color-primary),
-    var(--color-primary),
+    var(--color-primary) 10%,
+    var(--color-primary) 90%,
     transparent
   );
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .timeline-item {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -175,49 +175,125 @@
 
 .timeline-content {
   background: var(--card-bg);
-  padding: 1.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 16px var(--card-shadow);
-  width: 80%;
-  max-width: 500px;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 24px var(--card-shadow);
+  width: 85%;
+  max-width: 550px;
   position: relative;
-  border: 1px solid var(--card-border);
+  border: 2px solid var(--card-border);
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  overflow: hidden;
 }
 
-.timeline-content h3 {
-  font-size: 1.3rem;
+.timeline-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--color-primary), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.timeline-content:hover::before {
+  opacity: 1;
+}
+
+.timeline-content.inception {
+  border-color: rgba(255, 183, 77, 0.3);
+}
+
+.timeline-content.research {
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.timeline-content.implementation {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.timeline-content.future {
+  border-color: rgba(236, 72, 153, 0.3);
+}
+
+.timeline-icon {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), rgba(var(--color-primary-rgb), 0.6));
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.timeline-content.inception .timeline-icon {
+  background: linear-gradient(135deg, #FFB74D, #FFA726);
+}
+
+.timeline-content.research .timeline-icon {
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+}
+
+.timeline-content.implementation .timeline-icon {
+  background: linear-gradient(135deg, #10B981, #059669);
+}
+
+.timeline-content.future .timeline-icon {
+  background: linear-gradient(135deg, #EC4899, #F472B6);
+}
+
+.timeline-text {
+  flex: 1;
+}
+
+.timeline-text h3 {
+  font-size: 1.4rem;
   margin-bottom: 0.5rem;
   color: var(--text-primary);
-  background: linear-gradient(90deg, var(--color-primary), transparent);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-weight: 600;
 }
 
-.timeline-content p {
-  font-size: 1.1rem;
-  color: var(--text-primary);
-  opacity: 0.9;
+.timeline-text p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 .timeline-dot {
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   background: var(--color-primary);
   border-radius: 50%;
   top: 50%;
   transform: translateY(-50%);
-  box-shadow: 0 0 10px var(--color-primary);
+  box-shadow: 0 0 0 4px var(--card-bg), 0 0 15px var(--color-primary);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px var(--card-bg), 0 0 15px var(--color-primary);
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--card-bg), 0 0 25px var(--color-primary);
+  }
 }
 
 .timeline-item:nth-child(odd) .timeline-dot {
-  right: -6px;
+  right: -8px;
 }
 
 .timeline-item:nth-child(even) .timeline-dot {
-  left: -6px;
+  left: -8px;
 }
 
 /* Team Section */

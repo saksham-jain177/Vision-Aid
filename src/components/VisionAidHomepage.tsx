@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import {
-  Moon, Sun, Globe, Layers, Network,
-  ArrowRight, Shield, Database, Clock
+  Moon, Sun, Globe, ArrowRight, Shield, Database, Clock, Network, Layers
 } from 'lucide-react';
 import { FaGithub, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
 import './VisionAidHomepage.css';
@@ -13,9 +12,8 @@ import Chatbot from './Chatbot';
 const VisionAidHomepage = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [isDarkMode, setIsDarkMode] = useState(true); // Change false to true
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<any>(null);
 
   const chatbotImageUrl = "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png";
 
@@ -254,54 +252,6 @@ const VisionAidHomepage = () => {
     );
   };
 
-  // Update the interface for ProjectModal props
-  interface ProjectModalProps {
-    project: any;
-  }
-
-  const ProjectModal = ({ project }: ProjectModalProps) => {
-    if (!project) return null;
-
-    return (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <div className="modal-header">
-            <div className="modal-icon-container">
-              {project.icon}
-            </div>
-            <h2 className="modal-title">{project.title}</h2>
-          </div>
-          <p className="modal-description">{project.description}</p>
-          <div className="modal-actions">
-            <button
-              onClick={() => setSelectedProject(null)}
-              className="btn btn-primary"
-            >
-              Close Details
-            </button>
-            <button className="btn btn-secondary">
-              Learn More
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const projects = [
-    {
-      title: "Urban Traffic Dynamics",
-      description: "Revolutionizing urban mobility through AI-powered traffic optimization.",
-      icon: <Network className="project-icon" />,
-      color: "primary"
-    },
-    {
-      title: "Guardian Vision",
-      description: "AI-powered facial recognition system for locating missing persons.",
-      icon: <Layers className="project-icon" />,
-      color: "success"
-    }
-  ];
 
   const KeyFeatures = () => {
     const features = [
@@ -470,48 +420,30 @@ const VisionAidHomepage = () => {
       />
 
       <main className="main-content">
-      <section>
-  <motion.h1
-     initial={{ opacity: 0 }}
-     animate={{ opacity: 1 }}
-     transition={{ duration: 0.8 }}
-     className="main-heading"
-  >
-    VisionAid
-  </motion.h1>
-  <motion.div
-    className="project-grid"
-    initial={{ y: 50, opacity: 0 }}
-    animate={{ y: 0, opacity: 1 }}
-    transition={{
-      delay: 0.3,
-      duration: 0.8,
-      type: "spring",
-      stiffness: 100,
-      damping: 15
-    }}
-  >
-    {projects.map((project, index) => (
-      <div
-        key={index}
-        className="project-card"
-        onClick={() => setSelectedProject(project)}
-      >
-        <div className="project-icon-container">
-          {project.icon}
-        </div>
-        <h3 className="project-title">{project.title}</h3>
-        <p className="project-description">{project.description}</p>
-      </div>
-    ))}
-  </motion.div>
-</section>
-
-        {selectedProject && (
-          <ProjectModal
-            project={selectedProject}
-          />
-        )}
+        <section>
+          <motion.h1
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            className="main-heading"
+          >
+            VisionAid
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="hero-subtitle"
+            style={{ 
+              fontSize: '1.5rem', 
+              textAlign: 'center', 
+              marginTop: '1rem',
+              color: 'var(--text-secondary)'
+            }}
+          >
+            AI-powered computer vision platform for real-time analysis
+          </motion.p>
+        </section>
 
         <KeyFeatures />
         <TechnologiesSection />
