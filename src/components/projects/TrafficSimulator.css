@@ -199,27 +199,28 @@
 .control-btn.secondary {
   background: rgba(74, 144, 226, 0.15);
   border: 2px solid rgba(74, 144, 226, 0.3);
-  color: #4a90e2;
+  color: #ffffff;
   backdrop-filter: blur(10px);
 }
 
 .control-btn.secondary:hover {
   background: rgba(74, 144, 226, 0.25);
   border-color: rgba(74, 144, 226, 0.5);
-  color: #5ba3f5;
+  color: #ffffff;
   transform: translateY(-2px);
 }
 
 .control-btn.secondary.active {
   background: rgba(74, 144, 226, 0.15);
   border: 2px solid #a855f7;
-  color: #4a90e2;
+  color: #ffffff;
   box-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
 }
 
 .control-btn.secondary.active:hover {
-  background: rgba(168, 85, 247, 0.1);
+  background: rgba(168, 85, 247, 0.2);
   border-color: #a855f7;
+  color: #ffffff;
   transform: translateY(-2px);
   box-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
 }

@@ -3,9 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Play, BarChart3, Settings, Info, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import TrafficSimulator from './TrafficSimulator';
+import TrafficSimulatorV2 from './TrafficSimulatorV2';
 import YOLODetection from './YOLODetection';
-import IntersectionGridView from './IntersectionGridView';
 import './UrbanTrafficDynamics.css';
 
 const UrbanTrafficDynamics: React.FC = () => {
@@ -15,7 +14,6 @@ const UrbanTrafficDynamics: React.FC = () => {
   });
   const [activeTab, setActiveTab] = useState<'simulator' | 'analytics' | 'about' | 'yolo'>('simulator');
   const [showYoloModal, setShowYoloModal] = useState(false);
-  const [showGridView, setShowGridView] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
@@ -41,9 +39,9 @@ const UrbanTrafficDynamics: React.FC = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'simulator':
-        return <TrafficSimulator />;
+        return <TrafficSimulatorV2 />;
       case 'yolo':
-        return <TrafficSimulator />;
+        return <TrafficSimulatorV2 />;
       case 'analytics':
         return (
           <div className="analytics-content">
@@ -131,7 +129,7 @@ const UrbanTrafficDynamics: React.FC = () => {
           </div>
         );
       default:
-        return <TrafficSimulator />;
+        return <TrafficSimulatorV2 />;
     }
   };
 
@@ -219,20 +217,11 @@ const UrbanTrafficDynamics: React.FC = () => {
         className="tab-content"
       >
         {renderContent()}
-          </motion.div>
+            </motion.div>
 
       {/* YOLO Detection Modal */}
       {showYoloModal && (
         <YOLODetection onClose={() => setShowYoloModal(false)} />
-      )}
-
-      {/* Grid View Modal */}
-      {showGridView && (
-        <IntersectionGridView 
-          isVisible={showGridView}
-          rows={3}
-          cols={3}
-        />
       )}
     </div>
   );
