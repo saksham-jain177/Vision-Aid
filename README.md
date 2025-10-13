@@ -1,4 +1,4 @@
-# VisionAid - AI-Powered Computer Vision Platform 🌆
+# VisionAid - AI-Powered Computer Vision Platform
 
 [![React](https://img.shields.io/badge/React-19.0.0-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-blue.svg)](https://www.typescriptlang.org/)
@@ -166,7 +166,6 @@ vision-aid/
 - Click "Process" to extract facial features
 
 ### 2. Select Video Source
-- **CCTV**: Surveillance camera feeds
 - **Drone**: Aerial drone cameras
 - **Webcam**: Live camera testing
 - **Local Media**: Upload videos/images
@@ -188,30 +187,13 @@ vision-aid/
 
 ### Hosting Options
 
-**Recommended:** Vercel (optimal for Vite + React)
-- Automatic CI/CD from GitHub
-- Edge network for fast global access
-- Zero configuration needed
-
-**Alternative:** Render
-- Free tier available
-- Supports static sites
-- Requires manual build configuration
-
 ### Deploy to Vercel
 ```bash
 npm install -g vercel
 vercel
 ```
 
-### Deploy to Render
-1. Connect GitHub repository
-2. Set build command: `npm run build`
-3. Set publish directory: `dist`
-
 ## 👥 Contributors
-
-- **[Saksham Jain](https://github.com/saksham-jain177)** - Lead Developer & CV Engineer
 
 Want to contribute? Check out our [Contributing Guidelines](CONTRIBUTING.md).
 
@@ -219,17 +201,8 @@ Want to contribute? Check out our [Contributing Guidelines](CONTRIBUTING.md).
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## 📞 Contact Me
 
-- [@vladmandic/face-api](https://github.com/vladmandic/face-api) - Maintained fork for facial recognition
-- [Three.js](https://threejs.org/) - 3D visualization library
-- [OpenRouter](https://openrouter.ai/) - AI API integration
-- [Lucide](https://lucide.dev/) - Beautiful icon set
-- [Framer Motion](https://www.framer.com/motion/) - Animation library
-
-## 📞 Contact
-
-- **Developer**: Saksham Jain
 - **Email**: 177sakshamjain@gmail.com
 - **GitHub**: [@saksham-jain177](https://github.com/saksham-jain177)
 - **Project**: [https://github.com/saksham-jain177/Vision-Aid](https://github.com/saksham-jain177/Vision-Aid)
@@ -248,4 +221,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-<p align="center">Made with ❤️ by Saksham Jain</p>
+<p align="center">Made with ⚡ & ☕</p>
