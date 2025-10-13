@@ -67,17 +67,19 @@ const Contact: React.FC = () => {
     setSubmitStatus('idle');
     
     try {
-      // EmailJS configuration - Replace these with your actual credentials
-      // Get free credentials at https://www.emailjs.com/
-      // SERVICE_ID: Your EmailJS service ID
-      // TEMPLATE_ID: Your EmailJS template ID
-      // PUBLIC_KEY: Your EmailJS public key
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+      
+      if (!serviceId || !templateId || !publicKey) {
+        throw new Error('EmailJS credentials not configured');
+      }
       
       await emailjs.sendForm(
-        'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
-        'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
+        serviceId,
+        templateId,
         formRef.current,
-        'YOUR_PUBLIC_KEY' // Replace with your EmailJS public key
+        publicKey
       );
       
       setSubmitStatus('success');
@@ -373,14 +375,18 @@ const Contact: React.FC = () => {
               {isSubmitting ? 'Sending...' : 'Send Message'}
               <Send className="send-icon" size={18} />
             </motion.button>
-            <p style={{ 
-              marginTop: '1rem', 
-              fontSize: '0.85rem', 
-              color: 'var(--text-secondary)',
-              textAlign: 'center'
-            }}>
-              💡 Note: Configure EmailJS credentials in Contact.tsx to enable direct email sending
-            </p>
+            {(!import.meta.env.VITE_EMAILJS_SERVICE_ID || 
+              !import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 
+              !import.meta.env.VITE_EMAILJS_PUBLIC_KEY) && (
+              <p style={{ 
+                marginTop: '1rem', 
+                fontSize: '0.85rem', 
+                color: 'var(--text-secondary)',
+                textAlign: 'center'
+              }}>
+                💡 Note: EmailJS not configured. Using mailto fallback.
+              </p>
+            )}
           </form>
         </motion.section>
 

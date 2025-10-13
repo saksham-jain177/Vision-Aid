@@ -35,6 +35,12 @@ export const generateResponse = async (
   messages: OpenRouterMessage[]
 ): Promise<string> => {
   try {
+    // Check if API key is configured
+    if (!apiKey) {
+      console.warn('OpenRouter API key not configured');
+      return "I'm currently in demo mode. For full AI assistance, please configure the OpenRouter API key. How can I help you navigate VisionAid?";
+    }
+
     const response = await fetch(OPENROUTER_API_URL, {
       method: 'POST',
       headers: {
@@ -51,14 +57,37 @@ export const generateResponse = async (
           },
           ...messages
         ],
-        temperature: 0.3, // Reduced temperature for more consistent responses
+        temperature: 0.3,
       })
     });
 
+    // Check if response is OK
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('OpenRouter API error:', response.status, errorData);
+      
+      if (response.status === 429) {
+        return "I'm experiencing high demand right now. Please try again in a moment, or use the navigation menu to explore VisionAid.";
+      }
+      
+      if (response.status === 401) {
+        return "API authentication issue. Please contact support or use the navigation menu.";
+      }
+      
+      throw new Error(`API request failed: ${response.status}`);
+    }
+
     const data = await response.json();
+    
+    // Validate response structure
+    if (!data?.choices?.[0]?.message?.content) {
+      console.error('Invalid API response structure:', data);
+      return 'I apologize, but I received an unexpected response. Please try again or use the navigation menu.';
+    }
+
     return data.choices[0].message.content;
   } catch (error) {
     console.error('Error calling OpenRouter:', error);
-    return 'I apologize, but I encountered an error. Please try again.';
+    return 'I apologize, but I encountered an error. You can still navigate using the menu above. How can I help?';
   }
 };
