@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
+    hmr: {
+      overlay: true, // Show errors in browser overlay
+    },
     proxy: {
       // Proxy any request starting with /api to the Flask backend
       '/api': {

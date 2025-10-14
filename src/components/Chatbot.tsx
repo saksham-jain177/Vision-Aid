@@ -7,6 +7,7 @@ import './Chatbot.css';
 interface ChatMessage {
   text: string;
   sender: 'user' | 'bot';
+  timestamp: string;
 }
 
 interface OpenRouterMessage {
@@ -21,7 +22,7 @@ interface ChatbotProps {
 
 const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { text: getGreetingMessage(), sender: 'bot' }
+    { text: getGreetingMessage(), sender: 'bot', timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }
   ]);
   const [chatMessage, setChatMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -85,7 +86,8 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose }) => {
 
   const handleSendMessage = async () => {
     if (chatMessage.trim() && !isProcessing) {
-      const userMessage: ChatMessage = { text: chatMessage, sender: 'user' };
+      const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      const userMessage: ChatMessage = { text: chatMessage, sender: 'user', timestamp };
       setMessages(prev => [...prev, userMessage]);
       setChatMessage('');
       setIsProcessing(true);
@@ -107,7 +109,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose }) => {
           // Handle cases where the route might contain spaces (e.g., "project 1")
           route = route.replace(/\s+/g, '');
           const displayMessage = response.replace(/navigate:\/[\w-]+/, '').trim();
-          setMessages(prev => [...prev, { text: displayMessage, sender: 'bot' }]);
+          setMessages(prev => [...prev, { text: displayMessage, sender: 'bot', timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }]);
           setTimeout(() => {
             // Handle plural variations of routes
             const routePath = route.toLowerCase();
@@ -147,17 +149,19 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose }) => {
               // Handle unknown routes
               setMessages(prev => [...prev, {
                 text: "I'm not sure about that page. Available pages are: Home, Projects (including Urban Traffic Dynamics and Guardian Vision), About, and Contact.",
-                sender: 'bot'
+                sender: 'bot',
+                timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
               }]);
             }
           }, 1000);
         } else {
-          setMessages(prev => [...prev, { text: response, sender: 'bot' }]);
+          setMessages(prev => [...prev, { text: response, sender: 'bot', timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }]);
         }
       } catch (error) {
         setMessages(prev => [...prev, {
           text: "I apologize, but I'm having trouble connecting right now. Please try again.",
-          sender: 'bot'
+          sender: 'bot',
+          timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
         }]);
       } finally {
         setIsProcessing(false);
@@ -202,7 +206,8 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose }) => {
         <div className="chatbot-messages">
           {messages.map((message, index) => (
             <div key={index} className={`chatbot-message ${message.sender} ${isProcessing && index === messages.length - 1 ? 'processing' : ''}`}>
-              {message.text}
+              <div className="message-text">{message.text}</div>
+              <div className="message-timestamp">{message.timestamp}</div>
             </div>
           ))}
           <div ref={messagesEndRef} />
