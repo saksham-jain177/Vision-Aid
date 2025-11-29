@@ -5,18 +5,14 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    hmr: {
-      overlay: true, // Show errors in browser overlay
-    },
+    host: true,
+    open: true,
     proxy: {
-      // Proxy any request starting with /api to the Flask backend
       '/api': {
-        target: 'http://localhost:5001',
+        target: 'http://localhost:3001',
         changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
     },
   },
-  publicDir: 'public', // This ensures the public directory is served correctly
+  publicDir: 'public',
 });

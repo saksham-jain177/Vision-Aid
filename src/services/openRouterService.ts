@@ -1,41 +1,39 @@
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENROUTER_API_URL = '/api/chat';
 
 export interface OpenRouterMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
 }
 
-const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
-
 // Fallback responses when API is unavailable
 const getFallbackResponse = (userMessage: string): string => {
   const lowerMessage = userMessage.toLowerCase();
-  
+
   // Check if it's a navigation request (explicit keywords)
-  const isNavigationRequest = 
-    lowerMessage.includes('take me') || 
-    lowerMessage.includes('go to') || 
-    lowerMessage.includes('navigate') || 
+  const isNavigationRequest =
+    lowerMessage.includes('take me') ||
+    lowerMessage.includes('go to') ||
+    lowerMessage.includes('navigate') ||
     lowerMessage.includes('open') ||
     lowerMessage.includes('show me the page');
-  
+
   // Urban Traffic Dynamics info
-  if ((lowerMessage.includes('urban') || lowerMessage.includes('traffic')) && 
-      (lowerMessage.includes('what') || lowerMessage.includes('tell') || lowerMessage.includes('about') || lowerMessage.includes('explain'))) {
+  if ((lowerMessage.includes('urban') || lowerMessage.includes('traffic')) &&
+    (lowerMessage.includes('what') || lowerMessage.includes('tell') || lowerMessage.includes('about') || lowerMessage.includes('explain'))) {
     return "Urban Traffic Dynamics is a real-time traffic simulation system that uses density-based round-robin scheduling to optimize traffic signals. It dynamically measures vehicle density and adjusts green light duration, reducing average waiting times by up to 42%. Features include collision avoidance, lane discipline, and adaptive signal timing.";
   }
-  
+
   // Guardian Vision info
-  if ((lowerMessage.includes('guardian') || (lowerMessage.includes('face') && lowerMessage.includes('recognition'))) && 
-      (lowerMessage.includes('what') || lowerMessage.includes('tell') || lowerMessage.includes('about') || lowerMessage.includes('explain'))) {
+  if ((lowerMessage.includes('guardian') || (lowerMessage.includes('face') && lowerMessage.includes('recognition'))) &&
+    (lowerMessage.includes('what') || lowerMessage.includes('tell') || lowerMessage.includes('about') || lowerMessage.includes('explain'))) {
     return "Guardian Vision is an advanced facial recognition system for detecting and locating missing persons through multiple video sources (CCTV, drones, webcams). It features real-time face detection, privacy mode, geolocation tracking, and offline model caching. The system supports multiple reference images for improved accuracy.";
   }
-  
+
   // What can you do
   if (lowerMessage.includes('what can you') || lowerMessage.includes('what do you do') || lowerMessage.includes('help')) {
     return "I can help you navigate VisionAid and provide information about our projects. Ask me about Urban Traffic Dynamics or Guardian Vision, or say 'take me to [page]' to navigate. Try: 'Tell me about Guardian Vision' or 'Take me to projects'.";
   }
-  
+
   // Navigation requests
   if (lowerMessage.includes('home') || lowerMessage.includes('main')) {
     if (isNavigationRequest) {
@@ -43,42 +41,42 @@ const getFallbackResponse = (userMessage: string): string => {
     }
     return "VisionAid is an AI-powered computer vision platform with traffic simulation and facial recognition. Want to explore? Say 'take me to home'.";
   }
-  
+
   if (lowerMessage.includes('urban') || lowerMessage.includes('traffic') || (lowerMessage.includes('project') && lowerMessage.includes('1'))) {
     if (isNavigationRequest) {
       return "I'll take you to Urban Traffic Dynamics. navigate:/project1";
     }
     return "Urban Traffic Dynamics optimizes traffic signals using density-based scheduling. Want to see it? Say 'take me to Urban Traffic Dynamics'.";
   }
-  
+
   if (lowerMessage.includes('guardian') || (lowerMessage.includes('project') && lowerMessage.includes('2'))) {
     if (isNavigationRequest) {
       return "I'll take you to Guardian Vision. navigate:/project2";
     }
     return "Guardian Vision uses facial recognition to locate missing persons via multiple video sources. Want to see it? Say 'take me to Guardian Vision'.";
   }
-  
+
   if (lowerMessage.includes('about')) {
     if (isNavigationRequest) {
       return "I'll take you to the About page. navigate:/about";
     }
     return "VisionAid combines AI, computer vision, and real-time analytics for urban infrastructure management. Say 'take me to about' to learn more.";
   }
-  
+
   if (lowerMessage.includes('contact')) {
     if (isNavigationRequest) {
       return "I'll take you to the Contact page. navigate:/contact";
     }
     return "You can reach us through our contact form. Say 'take me to contact' to get in touch.";
   }
-  
+
   if (lowerMessage.includes('projects')) {
     if (isNavigationRequest) {
       return "I'll take you to the Projects page. navigate:/projects";
     }
     return "We have two main projects: Urban Traffic Dynamics (traffic optimization) and Guardian Vision (facial recognition). Say 'take me to projects' to explore them.";
   }
-  
+
   // Default response
   return "I'm VisionAid's assistant. Ask me about our projects (Urban Traffic Dynamics or Guardian Vision), or say 'take me to [page]' to navigate.";
 };
@@ -121,32 +119,16 @@ EXAMPLES:
 export const generateResponse = async (
   messages: OpenRouterMessage[]
 ): Promise<string> => {
-  // Log API key status for debugging
-  console.log('OpenRouter API Key Status:', {
-    exists: !!apiKey,
-    type: typeof apiKey,
-    length: apiKey?.length,
-    firstChars: apiKey?.substring(0, 10)
-  });
-
-  // Check if API key is configured
-  if (!apiKey || apiKey === 'undefined' || apiKey === '') {
-    console.warn('⚠️ OpenRouter API key not configured - using fallback mode');
-    return getFallbackResponse(messages[messages.length - 1]?.content || '');
-  }
-
   try {
-    console.log('🚀 Calling OpenRouter API...');
-    
+    console.log('🚀 Calling OpenRouter API via Proxy...');
+
     const response = await fetch(OPENROUTER_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': window.location.origin,
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-3.2-3b-instruct:free',
+        model: 'openai/gpt-oss-20b:free',
         messages: [
           {
             role: 'system' as const,
@@ -165,23 +147,30 @@ export const generateResponse = async (
     // Check if response is OK
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('❌ OpenRouter API error:', response.status, errorData);
-      
+      console.error('❌ OpenRouter API error:', response.status, JSON.stringify(errorData, null, 2));
+
       if (response.status === 429) {
-        return "I'm experiencing high demand right now. Try asking again in a moment!";
+        // Log the specific error message from OpenRouter if available
+        if (errorData?.error?.message) {
+          console.error('⚠️ Rate Limit Details:', errorData.error.message);
+        }
+        if (errorData?.error?.metadata?.raw) {
+          console.error('⚠️ Upstream Message:', errorData.error.metadata.raw);
+        }
+        return "I'm experiencing high demand right now (Rate Limited). Try asking again in a moment!";
       }
-      
+
       if (response.status === 401 || response.status === 403) {
         console.error('🔑 Authentication failed - check API key');
         return "Having trouble connecting. You can still navigate using the menu above!";
       }
-      
+
       throw new Error(`API request failed: ${response.status}`);
     }
 
     const data = await response.json();
     console.log('✅ OpenRouter Response:', data);
-    
+
     // Validate response structure
     if (!data?.choices?.[0]?.message?.content) {
       console.error('❌ Invalid API response structure:', data);
@@ -191,7 +180,7 @@ export const generateResponse = async (
     const aiResponse = data.choices[0].message.content.trim();
     console.log('💬 AI Response:', aiResponse);
     return aiResponse;
-    
+
   } catch (error) {
     console.error('❌ Error calling OpenRouter:', error);
     console.log('🔄 Falling back to offline mode');
