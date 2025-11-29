@@ -137,7 +137,7 @@ export const generateResponse = async (
           ...messages
         ],
         temperature: 0.3, // Lower temperature for more focused, consistent responses
-        max_tokens: 120, // Shorter responses
+        max_tokens: 300, // Allow fuller responses for project descriptions
         top_p: 0.9, // Nucleus sampling for better quality
       })
     });
