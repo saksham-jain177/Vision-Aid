@@ -252,6 +252,27 @@
     padding: 0.75rem 1rem;
     border-radius: 1rem;
     line-height: 1.4;
+    word-break: break-word; /* Fix overflow */
+}
+
+/* Link styles */
+.chat-link {
+    color: #60a5fa; /* Light blue */
+    text-decoration: underline;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.chat-link:hover {
+    color: #93c5fd;
+}
+
+.light-mode .chat-link {
+    color: #1e40af; /* Darker blue for light mode */
+}
+
+.light-mode .chat-link:hover {
+    color: #1d4ed8;
 }
 
 .chatbot-message.user {

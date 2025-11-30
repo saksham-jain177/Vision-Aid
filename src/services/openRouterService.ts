@@ -77,6 +77,15 @@ const getFallbackResponse = (userMessage: string): string => {
     return "We have two main projects: Urban Traffic Dynamics (traffic optimization) and Guardian Vision (facial recognition). Say 'take me to projects' to explore them.";
   }
 
+  // Socials Fallback
+  if (lowerMessage.includes('github')) {
+    return "Check out my GitHub profile: https://github.com/saksham-jain177";
+  }
+
+  if (lowerMessage.includes('linkedin')) {
+    return "Yes, connect with me on LinkedIn: https://www.linkedin.com/in/saksham-j-95a206225/";
+  }
+
   // Default response
   return "I'm VisionAid's assistant. Ask me about our projects (Urban Traffic Dynamics or Guardian Vision), or say 'take me to [page]' to navigate.";
 };
@@ -107,12 +116,19 @@ NAVIGATION:
 - Available: home, projects, about, contact, project1 (Urban Traffic), project2 (Guardian Vision)
 - Format: "I'll take you to [Page Name]. navigate:/PAGE"
 
+CONTACT & SOCIALS:
+- GitHub: https://github.com/saksham-jain177
+- LinkedIn: https://www.linkedin.com/in/saksham-j-95a206225/
+- Contact Page: navigate:/contact
+
 EXAMPLES:
 ✅ "what is visionaid?" → "VisionAid is an AI platform for traffic optimization and facial recognition, built by the VisionAid team."
 ✅ "tell me about guardian vision" → "Guardian Vision uses facial recognition to locate missing persons through multiple video sources like CCTV and drones."
 ✅ "what tech stack does urban traffic use?" → "Urban Traffic Dynamics is built with React 19, TypeScript, HTML5 Canvas API, and uses density-based algorithms for signal optimization."
 ✅ "what technologies does guardian vision use?" → "Guardian Vision uses React 19, TypeScript, TensorFlow.js, and @vladmandic/face-api for real-time facial recognition."
 ✅ "take me to projects" → "I'll take you to Projects. navigate:/projects"
+✅ "show me your github" → "Check out my GitHub profile: https://github.com/saksham-jain177"
+✅ "do you have linkedin?" → "Yes, connect with me on LinkedIn: https://www.linkedin.com/in/saksham-j-95a206225/"
 ❌ "how to bake a cake?" → "I'm VisionAid's assistant - I can only help with questions about our platform. Ask me about Urban Traffic Dynamics or Guardian Vision!"
 ❌ "what model are you?" → "I'm VisionAid's assistant, created by the VisionAid team. How can I help with our projects?"`
 

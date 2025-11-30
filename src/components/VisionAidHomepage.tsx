@@ -6,12 +6,10 @@ import {
 import { FaGithub, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
 import './VisionAidHomepage.css';
 import { Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import Chatbot from './Chatbot';
 
 const VisionAidHomepage = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
@@ -150,7 +148,7 @@ const VisionAidHomepage = () => {
 
           if (pos <= bound.min || pos >= bound.max) {
             // Type-safe way to set velocity
-            switch(axis) {
+            switch (axis) {
               case 'x': velocity.setX(vel * -0.8); break;
               case 'y': velocity.setY(vel * -0.8); break;
               case 'z': velocity.setZ(vel * -0.8); break;
@@ -201,20 +199,17 @@ const VisionAidHomepage = () => {
   }, [isDarkMode]);
 
   useEffect(() => {
-    if (isChatOpen && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isChatOpen]);
+    // Clean up or other effects
+  }, [isDarkMode]);
+
+  // Removed unused inputRef logic that was causing confusion
 
   useEffect(() => {
     const handleSlashKey = (event: KeyboardEvent) => {
-      if (event.key === '/' && document.activeElement !== inputRef.current) {
+      if (event.key === '/') {
         event.preventDefault();
         if (!isChatOpen) {
           setIsChatOpen(true);
-        }
-        if (inputRef.current) {
-          inputRef.current.focus();
         }
       }
     };
@@ -273,13 +268,7 @@ const VisionAidHomepage = () => {
     ];
 
     return (
-      <motion.section
-        whileInView={{ opacity: 1, y: 0 }}
-        initial={{ opacity: 0, y: 50 }}
-        transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-        viewport={{ once: true, margin: "-100px" }}
-        className="features-section"
-      >
+      <section className="features-section animate-fade-in">
         <div className="features-container">
           <h2 className="features-title">Key Technological Innovations</h2>
           <div className="features-grid">
@@ -296,7 +285,7 @@ const VisionAidHomepage = () => {
             ))}
           </div>
         </div>
-      </motion.section>
+      </section>
     );
   };
 
@@ -317,13 +306,7 @@ const VisionAidHomepage = () => {
     ];
 
     return (
-      <motion.section
-        whileInView={{ opacity: 1, y: 0 }}
-        initial={{ opacity: 0, y: 50 }}
-        transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-        viewport={{ once: true, margin: "-100px" }}
-        className="technologies-section"
-      >
+      <section className="technologies-section animate-fade-in">
         <div className="technologies-container">
           <h2 className="technologies-title">
             Our Core Technologies
@@ -341,7 +324,7 @@ const VisionAidHomepage = () => {
             ))}
           </div>
         </div>
-      </motion.section>
+      </section>
     );
   };
 
@@ -414,35 +397,27 @@ const VisionAidHomepage = () => {
       <Chatbot
         isOpen={isChatOpen}
         onClose={() => {
-          console.log("Parent onClose called"); // Debug log
+          console.log("Parent onClose called");
           setIsChatOpen(false);
         }}
       />
 
       <main className="main-content">
         <section>
-          <motion.h1
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="main-heading"
-          >
+          <h1 className="main-heading animate-fade-in">
             VisionAid
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="hero-subtitle"
-            style={{ 
-              fontSize: '1.5rem', 
-              textAlign: 'center', 
+          </h1>
+          <p
+            className="hero-subtitle animate-slide-up"
+            style={{
+              fontSize: '1.5rem',
+              textAlign: 'center',
               marginTop: '1rem',
               color: 'var(--text-secondary)'
             }}
           >
             AI-powered computer vision platform for real-time analysis
-          </motion.p>
+          </p>
         </section>
 
         <KeyFeatures />
