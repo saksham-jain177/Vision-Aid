@@ -1,35 +1,5 @@
 /* Base styles */
-:root {
-  --color-primary: #3182ce;
-  --color-success: #48bb78;
-  --color-danger: #e53e3e;
-  --color-gray: #718096;
-  --color-dark: #1a202c;
-  --color-light: #f7fafc;
-}
-
-/* Dark mode colors */
-.dark-mode {
-  --bg-primary: #0a1128;
-  --text-primary: #f7fafc;
-  --header-bg: rgba(26, 32, 44, 0.7);
-  --card-bg: rgba(255, 255, 255, 0.05);
-  --card-border: rgba(255, 255, 255, 0.1);
-  --card-hover-border: rgba(255, 255, 255, 0.2);
-  --card-shadow: rgba(0, 0, 0, 0.3);
-  --hex-color: rgba(102, 204, 255, 0.15); /* Brighter hexagons in dark mode */
-}
-
-/* Light mode colors */
-.light-mode {
-  --bg-primary: #f0f8ff;
-  --text-primary: #1a202c;
-  --header-bg: rgba(255, 255, 255, 0.7);
-  --card-bg: rgba(255, 255, 255, 0.9);
-  --card-border: rgba(0, 0, 0, 0.1);
-  --card-hover-border: rgba(0, 0, 0, 0.2);
-  --card-shadow: rgba(0, 0, 0, 0.1);
-}
+/* Base styles are now in index.css */
 
 /* Header styles */
 .header {
@@ -41,25 +11,51 @@
   backdrop-filter: blur(8px);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   background: var(--header-bg);
+  height: 70px; /* Locked height */
+  display: flex;
+  align-items: center;
+  overflow: visible; /* Ensure logo can stick out */
 }
 
 .header-container {
   width: 100%;
   margin: 0;
-  padding: 1rem 1rem 1rem 0;
+  padding: 0 1rem 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
   margin-right: 0;
+  height: 100%;
+  overflow: visible;
 }
 
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0;
   margin-left: 0;
   padding-left: 0;
+  position: relative;
+  overflow: visible;
+  height: 100%; /* Occupy full height to help centering */
+}
+
+.logo-icon {
+  width: 100px; /* Updated to 100px */
+  height: 100px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(49, 130, 206, 0.4));
+  transition: transform 0.3s ease;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: -10px;
+  z-index: 10;
+}
+
+.logo-icon:hover {
+  transform: translateY(-50%) scale(1.1);
 }
 
 .logo-text {
@@ -78,6 +74,8 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   animation: colorDiffuse 15s ease-in-out infinite;
   position: relative;
+  margin-left: 72px;
+  z-index: 5;
 }
 
 @keyframes colorDiffuse {

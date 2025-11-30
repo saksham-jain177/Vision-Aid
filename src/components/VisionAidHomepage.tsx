@@ -1,23 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import {
-  Moon, Sun, Globe, ArrowRight, Shield, Database, Clock, Network, Layers
+  Moon, Sun, ArrowRight, Shield, Database, Clock, Network, Layers
 } from 'lucide-react';
 import { FaGithub, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
 import './VisionAidHomepage.css';
 import { Link, useLocation } from 'react-router-dom';
-import Chatbot from './Chatbot';
 
-const VisionAidHomepage = () => {
+interface VisionAidHomepageProps {
+  isDarkMode: boolean;
+  setIsDarkMode: (isDark: boolean) => void;
+}
+
+const VisionAidHomepage = ({ isDarkMode, setIsDarkMode }: VisionAidHomepageProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const chatbotImageUrl = "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png";
-
-  useEffect(() => {
-    document.body.className = isDarkMode ? 'dark-mode' : 'light-mode';
-  }, [isDarkMode]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -198,28 +197,6 @@ const VisionAidHomepage = () => {
     };
   }, [isDarkMode]);
 
-  useEffect(() => {
-    // Clean up or other effects
-  }, [isDarkMode]);
-
-  // Removed unused inputRef logic that was causing confusion
-
-  useEffect(() => {
-    const handleSlashKey = (event: KeyboardEvent) => {
-      if (event.key === '/') {
-        event.preventDefault();
-        if (!isChatOpen) {
-          setIsChatOpen(true);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleSlashKey);
-    return () => {
-      window.removeEventListener('keydown', handleSlashKey);
-    };
-  }, [isChatOpen]);
-
   const Header = () => {
     const location = useLocation();
 
@@ -227,7 +204,20 @@ const VisionAidHomepage = () => {
       <header className="header">
         <div className="header-container">
           <Link to="/" className="logo-container" style={{ textDecoration: 'none' }}>
-            <Globe className="logo-icon" />
+            <img
+              src="/logo-final.png"
+              alt="VisionAid Logo"
+              className="logo-icon"
+              style={{
+                width: '100px',
+                height: '100px',
+                position: 'absolute',
+                top: '50%',
+                left: '-10px',
+                transform: 'translateY(-50%)',
+                zIndex: 10
+              }}
+            />
             <h1 className="logo-text">VisionAid</h1>
           </Link>
           <nav className="nav-menu">
@@ -386,21 +376,6 @@ const VisionAidHomepage = () => {
     <div className={isDarkMode ? 'dark-mode' : 'light-mode'}>
       <canvas ref={canvasRef} className="canvas-container" />
       <Header />
-
-      <button
-        className="chatbot-toggle"
-        onClick={() => setIsChatOpen(true)}
-      >
-        <img src={chatbotImageUrl} alt="Chatbot" />
-      </button>
-
-      <Chatbot
-        isOpen={isChatOpen}
-        onClose={() => {
-          console.log("Parent onClose called");
-          setIsChatOpen(false);
-        }}
-      />
 
       <main className="main-content">
         <section>

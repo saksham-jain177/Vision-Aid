@@ -22,9 +22,10 @@ interface OpenRouterMessage {
 interface ChatbotProps {
   isOpen: boolean;
   onClose: () => void;
+  isDarkMode: boolean;
 }
 
-const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose }) => {
+const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, isDarkMode }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { text: getGreetingMessage(), sender: 'bot', timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }
   ]);
@@ -258,7 +259,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose }) => {
         className={`chatbot-backdrop ${isOpen ? 'open' : ''}`}
         onClick={onCloseWithAnimation}
       />
-      <div className={`chatbot-window ${isOpen ? 'open' : ''} ${isClosing ? 'closing' : ''}`}>
+      <div className={`chatbot-window ${isOpen ? 'open' : ''} ${isClosing ? 'closing' : ''} ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
         <div className="chatbot-header">
           <h3>AI Assistant</h3>
           <button onClick={onCloseWithAnimation}>

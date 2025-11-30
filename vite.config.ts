@@ -15,4 +15,15 @@ export default defineConfig({
     },
   },
   publicDir: 'public',
+  build: {
+    chunkSizeWarningLimit: 1000, // Increase limit to 1MB
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
+          ai: ['@xenova/transformers'], // Split AI model into its own chunk
+        },
+      },
+    },
+  },
 });
