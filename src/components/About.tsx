@@ -6,14 +6,15 @@ import { Globe, Sun, Moon, ArrowRight, Lightbulb, Beaker, Code, Target } from 'l
 import './About.css';
 import './ImpactSection.css';
 import Chatbot from './Chatbot';
+import ChatbotToggle from './ChatbotToggle';
+import Header from './Header';
+import Footer from './Footer';
 import { useLocation } from 'react-router-dom';
 
 const About: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  
-  const chatbotImageUrl = "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png";
 
   // Animation variants for smoother transitions
   const fadeInUp = {
@@ -55,91 +56,15 @@ const About: React.FC = () => {
     };
   }, [isChatOpen]);
 
-  const Header = () => {
-      const location = useLocation(); // Get current route path
-    
-      return (
-        <header className="header">
-          <div className="header-container">
-            <Link to="/" className="logo-container" style={{ textDecoration: 'none' }}>
-              <Globe className="logo-icon" />
-              <h1 className="logo-text">VisionAid</h1>
-            </Link>
-            <nav className="nav-menu">
-              <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>Home</Link>
-              <Link to="/projects" className={`nav-link ${location.pathname === '/projects' ? 'active' : ''}`}>Projects</Link>
-              <Link to="/about" className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}>About</Link>
-              <Link to="/contact" className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}>Contact</Link>
-            </nav>
-            <button className="mode-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
-              {isDarkMode ? <Sun className="toggle-icon" /> : <Moon className="toggle-icon" />}
-            </button>
-          </div>
-        </header>
-      );
-    };
-  
 
-  const Footer = () => (
-    <footer className="footer">
-      <div className="footer-container">
-        <div className="footer-section">
-          <h3 className="footer-title">VisionAid</h3>
-          <p>Transforming urban infrastructure through intelligent technology.</p>
-          <div className="social-icons">
-            <a 
-              href="https://github.com/saksham-jain177/Vision-Aid" 
-              className="social-icon"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaGithub />
-            </a>
-            <a href="https://www.linkedin.com/in/saksham-j-95a206225/" className="social-icon" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
-            <a href="#" className="social-icon"><FaTwitter /></a>
-            <a href="#" className="social-icon"><FaInstagram /></a>
-          </div>
-        </div>
-        <div className="footer-section">
-          <h4 className="footer-title">Quick Links</h4>
-          <div className="footer-links">
-            <Link to="/" className="footer-link">Home</Link>
-            <Link to="/projects" className="footer-link">Projects</Link>
-            <Link to="/about" className="footer-link">About</Link>
-            <Link to="/contact" className="footer-link">Contact</Link>
-          </div>
-        </div>
-        <div className="footer-section">
-          <h4 className="footer-title">Contact</h4>
-          <p>Email: 177sakshamjain@gmail.com</p>
-          <p>AI Developer: Saksham Jain</p>
-        </div>
-        <div className="footer-section">
-          <h4 className="footer-title">Newsletter</h4>
-          <div className="newsletter-form">
-            <input 
-              type="email" 
-              placeholder="Enter your email"
-              className="newsletter-input"
-            />
-            <button className="newsletter-button">
-              <ArrowRight />
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="footer-bottom">
-        © 2025 VisionAid. All Rights Reserved.
-      </div>
-    </footer>
-  );
+
 
   return (
     <div className={isDarkMode ? 'dark-mode' : 'light-mode'}>
       <div className="about-container">
-        <Header />
-        
-        <motion.div 
+        <Header isDarkMode={isDarkMode} toggleTheme={() => setIsDarkMode(!isDarkMode)} />
+
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
@@ -151,33 +76,29 @@ const About: React.FC = () => {
             {isDarkMode ? <Sun className="toggle-icon" /> : <Moon className="toggle-icon" />}
           </button>
 
-          <button
-            className="chatbot-toggle"
-            onClick={() => setIsChatOpen(!isChatOpen)}
-          >
-            <img src={chatbotImageUrl} alt="Chatbot" />
-          </button>
-          
+          <ChatbotToggle isOpen={isChatOpen} onClick={() => setIsChatOpen(!isChatOpen)} />
+
           <Chatbot
             isOpen={isChatOpen}
             onClose={() => setIsChatOpen(false)}
+            isDarkMode={isDarkMode}
           />
         </motion.div>
 
         {/* Hero Section - Optimized animation */}
-        <motion.section 
+        <motion.section
           className="about-hero"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <motion.h1 
+          <motion.h1
             className="about-title"
             {...fadeInUp}
           >
             Our Vision for Accessibility
           </motion.h1>
-          <motion.p 
+          <motion.p
             className="about-subtitle"
             {...fadeInUp}
             transition={{ delay: 0.1, duration: 0.5 }}
@@ -187,13 +108,13 @@ const About: React.FC = () => {
         </motion.section>
 
         {/* Mission Section - Optimized animation */}
-        <motion.section 
+        <motion.section
           className="mission-section"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
         >
-          <motion.div 
+          <motion.div
             className="mission-content"
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -201,13 +122,13 @@ const About: React.FC = () => {
             <FaEye className="mission-icon" />
             <h2>Our Mission</h2>
             <p>
-            VisionAid creates smarter, sustainable cities through AI, optimizing infrastructure for everyone.
+              VisionAid creates smarter, sustainable cities through AI, optimizing infrastructure for everyone.
             </p>
           </motion.div>
         </motion.section>
 
         {/* Values Section - Optimized animation */}
-        <motion.section 
+        <motion.section
           className="values-section"
           variants={staggerContainer}
           initial="initial"
@@ -215,7 +136,7 @@ const About: React.FC = () => {
         >
           <h2 className="values-title">Our Core Values</h2>
           <div className="values-grid">
-            <motion.div 
+            <motion.div
               className="value-card"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -226,7 +147,7 @@ const About: React.FC = () => {
               <p>VisionAid builds smarter, sustainable cities through AI and real-time analytics, optimizing infrastructure for all.</p>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="value-card"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -237,7 +158,7 @@ const About: React.FC = () => {
               <p>Continuously pushing the boundaries of AI and smart surveillance to enhance urban infrastructure.</p>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="value-card"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -252,7 +173,7 @@ const About: React.FC = () => {
 
         {/* Timeline Section */}
         <section className="timeline-section">
-          <motion.h2 
+          <motion.h2
             className="timeline-title"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -262,16 +183,16 @@ const About: React.FC = () => {
             Our Journey
           </motion.h2>
           <div className="timeline">
-            <motion.div 
+            <motion.div
               className="timeline-item"
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.2, type: "spring", stiffness: 100 }}
             >
-              <motion.div 
+              <motion.div
                 className="timeline-content inception"
-                whileHover={{ 
+                whileHover={{
                   scale: 1.02,
                   transition: { duration: 0.2 }
                 }}
@@ -287,16 +208,16 @@ const About: React.FC = () => {
               </motion.div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="timeline-item"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.4, type: "spring", stiffness: 100 }}
             >
-              <motion.div 
+              <motion.div
                 className="timeline-content research"
-                whileHover={{ 
+                whileHover={{
                   scale: 1.02,
                   transition: { duration: 0.2 }
                 }}
@@ -312,16 +233,16 @@ const About: React.FC = () => {
               </motion.div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="timeline-item"
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.6, type: "spring", stiffness: 100 }}
             >
-              <motion.div 
+              <motion.div
                 className="timeline-content implementation"
-                whileHover={{ 
+                whileHover={{
                   scale: 1.02,
                   transition: { duration: 0.2 }
                 }}
@@ -337,16 +258,16 @@ const About: React.FC = () => {
               </motion.div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="timeline-item"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.8, type: "spring", stiffness: 100 }}
             >
-              <motion.div 
+              <motion.div
                 className="timeline-content future"
-                whileHover={{ 
+                whileHover={{
                   scale: 1.02,
                   transition: { duration: 0.2 }
                 }}
@@ -364,6 +285,38 @@ const About: React.FC = () => {
           </div>
         </section>
 
+        <motion.section
+          className="about-section"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4 }}
+        >
+          <h2 className="section-title">
+            <FaCogs className="section-icon" />
+            Hybrid AI Architecture
+          </h2>
+          <p className="section-text">
+            VisionAid leverages a cutting-edge <strong>Hybrid AI Engine</strong> that seamlessly switches between
+            cloud-based Large Language Models (via OpenRouter) and local, privacy-focused models (via Ollama).
+            This architecture ensures:
+          </p>
+          <ul className="feature-list">
+            <li>
+              <FaCheckCircle className="list-icon" />
+              <strong>Privacy First:</strong> Sensitive data can be processed locally without leaving your device.
+            </li>
+            <li>
+              <FaCheckCircle className="list-icon" />
+              <strong>High Availability:</strong> Cloud fallback ensures the assistant is always ready to help.
+            </li>
+            <li>
+              <FaCheckCircle className="list-icon" />
+              <strong>Cost Efficiency:</strong> Routine queries are handled locally, reducing API costs.
+            </li>
+          </ul>
+        </motion.section>
+
         {/* Impact Section */}
         <section className="impact-section">
           <h2 className="impact-title">Our Impact</h2>
@@ -371,7 +324,7 @@ const About: React.FC = () => {
             Through cutting-edge computer vision and AI solutions, VisionAid is reshaping the way cities manage traffic, security, and accessibility.
           </p>
           <div className="impact-grid">
-            <motion.div 
+            <motion.div
               className="impact-card"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -379,7 +332,7 @@ const About: React.FC = () => {
               <h3>10+ Cities</h3>
               <p>Pilots and deployments across urban centres</p>
             </motion.div>
-            <motion.div 
+            <motion.div
               className="impact-card"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -387,7 +340,7 @@ const About: React.FC = () => {
               <h3>98% Accuracy</h3>
               <p>In detecting traffic violations and hazards</p>
             </motion.div>
-            <motion.div 
+            <motion.div
               className="impact-card"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}

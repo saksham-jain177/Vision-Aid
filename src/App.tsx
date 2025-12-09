@@ -10,12 +10,11 @@ import './App.css';
 
 import { useState, useEffect, useRef } from 'react';
 import Chatbot from './components/Chatbot';
+import ChatbotToggle from './components/ChatbotToggle';
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const chatbotImageUrl = "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png";
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     document.body.className = isDarkMode ? 'dark-mode' : 'light-mode';
@@ -55,13 +54,7 @@ function App() {
       </Routes>
 
       {/* Global Chatbot */}
-      <button
-        className="chatbot-toggle"
-        onClick={() => setIsChatOpen(true)}
-        style={{ zIndex: 9999 }} // Ensure it's above everything
-      >
-        <img src={chatbotImageUrl} alt="Chatbot" />
-      </button>
+      <ChatbotToggle isOpen={isChatOpen} onClick={() => setIsChatOpen(!isChatOpen)} />
 
       <Chatbot
         isOpen={isChatOpen}

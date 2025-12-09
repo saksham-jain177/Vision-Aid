@@ -1,0 +1,139 @@
+/* Header.css */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background: var(--header-bg);
+  height: 70px; /* Locked height */
+  display: flex;
+  align-items: center;
+  overflow: visible; /* Ensure logo can stick out */
+}
+
+.header-container {
+  width: 100%;
+  margin: 0;
+  padding: 0 1rem 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-right: 0;
+  height: 100%;
+  overflow: visible;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-left: 0;
+  padding-left: 0;
+  position: relative;
+  overflow: visible;
+  height: 100%; /* Occupy full height to help centering */
+}
+
+.logo-icon {
+  width: 120px; /* Increased from 100px */
+  height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(49, 130, 206, 0.4));
+  transition: transform 0.3s ease;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: -10px;
+  z-index: 10;
+}
+
+.logo-icon:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
+.logo-text {
+  font-size: 1.8rem;
+  font-weight: bold;
+  background: linear-gradient(135deg,
+    rgba(255, 107, 107, 1),
+    rgba(72, 52, 212, 1),
+    rgba(190, 46, 221, 1),
+    rgba(255, 107, 107, 1)
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  animation: colorDiffuse 15s ease-in-out infinite;
+  position: relative;
+  margin-left: 92px; /* Increased from 72px to accommodate larger logo */
+  z-index: 5;
+}
+
+@keyframes colorDiffuse {
+  0%, 100% {
+    background-position: 0% 50%;
+    filter: saturate(1) brightness(1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  25% {
+    background-position: 100% 50%;
+    filter: saturate(1.2) brightness(1.1);
+  }
+  50% {
+    background-position: 50% 100%;
+    filter: saturate(1.4) brightness(1.2);
+  }
+  75% {
+    background-position: 0% 100%;
+    filter: saturate(1.2) brightness(1.1);
+  }
+}
+
+.nav-menu {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  font-size: 1rem;
+}
+
+.nav-link:hover {
+  opacity: 0.8;
+}
+
+.nav-link.active {
+  color: var(--color-primary);
+}
+
+.mode-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.mode-toggle:hover {
+  transform: rotate(15deg);
+}
+
+.toggle-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}

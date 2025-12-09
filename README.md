@@ -2,6 +2,8 @@
 
 [![React](https://img.shields.io/badge/React-19.0.0-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-blue.svg)](https://www.typescriptlang.org/)
+[![CI](https://github.com/saksham-jain177/Vision-Aid/actions/workflows/ci.yml/badge.svg)](https://github.com/saksham-jain177/Vision-Aid/actions)
+[![Tests](https://img.shields.io/badge/tests-34%20passing-brightgreen.svg)](.)
 [![Three.js](https://img.shields.io/badge/Three.js-0.174.0-green.svg)](https://threejs.org/)
 [![face-api](https://img.shields.io/badge/%40vladmandic%2Fface--api-1.7.13-orange.svg)](https://github.com/vladmandic/face-api)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -119,6 +121,9 @@ Visit `http://localhost:3000` to view the application.
 | `npm run build:check` | Build with TypeScript type checking |
 | `npm run lint` | Run ESLint |
 | `npm run lint:fix` | Run ESLint with auto-fix |
+| `npm test` | Run tests in watch mode |
+| `npm run test:run` | Run all tests once |
+| `npm run test:ui` | Open Vitest UI dashboard |
 | `npm run preview` | Preview production build |
 | `npm run audit` | Security vulnerability check |
 | `npm run clean` | Clean build artifacts |

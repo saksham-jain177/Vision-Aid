@@ -1,11 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { X, Send } from 'lucide-react';
+import { X, Send, Settings, Cpu, Cloud } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { generateResponse } from '../services/openRouterService';
+import { generateOllamaResponse, checkOllamaConnection } from '../services/ollamaService';
 import { CHATBOT_ROUTE_ALIASES } from '../config/routes';
 import { getCachedResponse, setCachedResponse } from '../utils/chatCache';
 import { detectIntent, extractPageFromNavIntent } from '../utils/intentDetection';
+import { sanitizeChatMessage } from '../utils/sanitize';
+import { chatRateLimiter, getSessionId } from '../utils/rateLimit';
 import './Chatbot.css';
 
 interface ChatMessage {
@@ -32,10 +35,22 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, isDarkMode }) => {
   const [chatMessage, setChatMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastMessageTime, setLastMessageTime] = useState<number>(0);
+  const [modelProvider, setModelProvider] = useState<'cloud' | 'local'>('cloud');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [agentStatus, setAgentStatus] = useState<string>('');
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isClosing, setIsClosing] = useState(false);
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const savedProvider = localStorage.getItem('visionAid_modelProvider');
+    if (savedProvider === 'local' || savedProvider === 'cloud') {
+      setModelProvider(savedProvider);
+    }
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -87,6 +102,24 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, isDarkMode }) => {
     };
   }, [isOpen, onClose]);
 
+  const toggleModelProvider = async (provider: 'cloud' | 'local') => {
+    if (provider === modelProvider) return;
+    if (provider === 'local') {
+      const isOllamaAvailable = await checkOllamaConnection();
+      if (!isOllamaAvailable) {
+        setToastMessage('⚠️ Ollama not running');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+        return;
+      }
+    }
+    setModelProvider(provider);
+    localStorage.setItem('visionAid_modelProvider', provider);
+    setToastMessage(`Switched to ${provider === 'local' ? 'Local' : 'Cloud'}`);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2500);
+  };
+
   // Shared function to handle response actions (navigation, etc.)
   const processResponseAction = (response: string) => {
     const navigationMatch = response.match(/navigate:\/(\w+)/);
@@ -125,20 +158,34 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, isDarkMode }) => {
 
   const handleSendMessage = async () => {
     if (chatMessage.trim() && !isProcessing) {
-      // Rate limiting: 2-second cooldown
-      const now = Date.now();
-      if (now - lastMessageTime < 2000) {
-        console.log('⏳ Rate limit: Please wait before sending another message');
+      // Security: Sanitize user input
+      const sanitized = sanitizeChatMessage(chatMessage);
+
+      if (!sanitized.valid) {
+        setToastMessage(sanitized.error || 'Invalid message');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+        return;
+      }
+
+      // Security: Rate limiting (10 messages per minute)
+      const sessionId = getSessionId();
+      if (!chatRateLimiter.canMakeRequest(sessionId, 10, 60000)) {
+        const waitTime = chatRateLimiter.getTimeUntilReset(sessionId, 60000);
+        setToastMessage(`⏱️ Please wait ${waitTime}s before sending another message`);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
         return;
       }
 
       const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-      const userMessage: ChatMessage = { text: chatMessage, sender: 'user', timestamp };
+      const userMessage: ChatMessage = { text: sanitized.sanitized, sender: 'user', timestamp };
       setMessages(prev => [...prev, userMessage]);
-      const currentMessage = chatMessage;
+      const currentMessage = sanitized.sanitized;
       setChatMessage('');
+      setLastMessageTime(Date.now());
       setIsProcessing(true);
-      setLastMessageTime(now);
+      setAgentStatus('Thinking...');
 
       try {
         // 1. Check Cache
@@ -176,21 +223,46 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, isDarkMode }) => {
           }
         }
 
-        // 3. Call OpenRouter API (if not navigation or navigation failed)
-        console.log('Calling OpenRouter API...');
+        // 3. Call LLM (Cloud or Local)
+        let response: string;
 
-        // Limit conversation history to last 10 messages
-        const recentMessages = messages.slice(-10);
+        if (modelProvider === 'local') {
+          console.log('Calling Local Ollama...');
+          setAgentStatus('Processing locally...');
 
-        const messageHistory: OpenRouterMessage[] = recentMessages.map(msg => ({
-          role: msg.sender === 'user' ? 'user' : 'assistant',
-          content: msg.text
-        }));
+          // Check connection first
+          const isConnected = await checkOllamaConnection();
+          if (!isConnected) {
+            throw new Error("Ollama not reachable. Make sure it's running on port 11434.");
+          }
 
-        const response = await generateResponse([
-          ...messageHistory,
-          { role: 'user' as const, content: currentMessage }
-        ]);
+          const recentMessages = messages.slice(-10);
+          const messageHistory = recentMessages.map(msg => ({
+            role: msg.sender === 'user' ? 'user' : 'assistant',
+            content: msg.text
+          }));
+
+          response = await generateOllamaResponse([
+            ...messageHistory,
+            { role: 'user', content: currentMessage }
+          ]);
+
+        } else {
+          // Cloud (OpenRouter)
+          console.log('Calling OpenRouter API...');
+          setAgentStatus('Contacting cloud...');
+
+          const recentMessages = messages.slice(-10);
+          const messageHistory: OpenRouterMessage[] = recentMessages.map(msg => ({
+            role: msg.sender === 'user' ? 'user' : 'assistant',
+            content: msg.text
+          }));
+
+          response = await generateResponse([
+            ...messageHistory,
+            { role: 'user' as const, content: currentMessage }
+          ]);
+        }
 
         // Only cache successful responses (not error messages)
         if (response && !response.includes("I apologize") && !response.includes("trouble connecting")) {
@@ -199,14 +271,22 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, isDarkMode }) => {
 
         processResponseAction(response);
 
-      } catch (error) {
+      } catch (error: any) {
+        console.error("Chat Error:", error);
+        let errorMessage = "I apologize, but I'm having trouble connecting right now. Please try again.";
+
+        if (modelProvider === 'local' && error.message.includes("Ollama")) {
+          errorMessage = "⚠️ Could not connect to Ollama. Is it running locally on port 11434? You can switch back to Cloud mode in settings.";
+        }
+
         setMessages(prev => [...prev, {
-          text: "I apologize, but I'm having trouble connecting right now. Please try again.",
+          text: errorMessage,
           sender: 'bot',
           timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
         }]);
       } finally {
         setIsProcessing(false);
+        setAgentStatus('');
         if (inputRef.current) {
           inputRef.current.focus();
         }
@@ -261,18 +341,74 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, isDarkMode }) => {
       />
       <div className={`chatbot-window ${isOpen ? 'open' : ''} ${isClosing ? 'closing' : ''} ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
         <div className="chatbot-header">
-          <h3>AI Assistant</h3>
-          <button onClick={onCloseWithAnimation}>
-            <X size={20} />
-          </button>
+          <div className="header-title">
+            <h3>AI Assistant</h3>
+            <span className={`provider-badge ${modelProvider}`}>
+              {modelProvider === 'cloud' ? <Cloud size={12} /> : <Cpu size={12} />}
+              {modelProvider === 'cloud' ? 'Cloud' : 'Local'}
+            </span>
+          </div>
+          <div className="header-actions">
+            <button onClick={() => setIsSettingsOpen(!isSettingsOpen)} className="settings-btn">
+              <Settings size={18} />
+            </button>
+            <button onClick={onCloseWithAnimation}>
+              <X size={20} />
+            </button>
+          </div>
         </div>
+
+        {showToast && (
+          <div className="chatbot-toast">
+            {toastMessage}
+          </div>
+        )}
+
+        {isSettingsOpen && (
+          <div className="chatbot-settings">
+            <h4>Neural Engine</h4>
+            <div className="provider-options">
+              <button
+                className={`provider-option ${modelProvider === 'cloud' ? 'active' : ''}`}
+                onClick={() => toggleModelProvider('cloud')}
+              >
+                <Cloud size={16} />
+                <div className="provider-info">
+                  <span className="name">Cloud (OpenRouter)</span>
+                  <span className="desc">Production Grade • Zero Setup</span>
+                </div>
+              </button>
+              <button
+                className={`provider-option ${modelProvider === 'local' ? 'active' : ''}`}
+                onClick={() => toggleModelProvider('local')}
+              >
+                <Cpu size={16} />
+                <div className="provider-info">
+                  <span className="name">Local (Ollama)</span>
+                  <span className="desc">Privacy Focused • Requires Setup</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="chatbot-messages">
           {messages.map((message, index) => (
-            <div key={index} className={`chatbot-message ${message.sender} ${isProcessing && index === messages.length - 1 ? 'processing' : ''}`}>
+            <div key={index} className={`chatbot-message ${message.sender}`}>
               <div className="message-text">{renderMessageText(message.text)}</div>
               <div className="message-timestamp">{message.timestamp}</div>
             </div>
           ))}
+          {isProcessing && (
+            <div className="chatbot-message bot processing-bubble">
+              <div className="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              {agentStatus && <span className="agent-status-text">{agentStatus}</span>}
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
         <div className="chatbot-input">
@@ -281,7 +417,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, isDarkMode }) => {
             type="text"
             value={chatMessage}
             onChange={(e) => setChatMessage(e.target.value)}
-            placeholder={isProcessing ? "Processing..." : "Press '/' to chat"}
+            placeholder={agentStatus || (isProcessing ? "Processing..." : "Press '/' to chat")}
             disabled={isProcessing}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !isProcessing) {
@@ -290,7 +426,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, isDarkMode }) => {
             }}
           />
           <button onClick={handleSendMessage} disabled={isProcessing}>
-            <Send size={20} />
+            <Send size={24} />
           </button>
         </div>
       </div>

@@ -7,12 +7,14 @@ import {
   Layers, Bolt, Lightbulb, TrendingUp,
   Search
 } from 'lucide-react';
+import Header from './Header';
+import Footer from './Footer';
 import * as THREE from 'three';
 import './Projects.css';
 import Chatbot from './Chatbot';
+import ChatbotToggle from './ChatbotToggle';
 import ProjectDetailsModal from './projects/ProjectDetailsModal';
 import SuggestProjectModal from './projects/SuggestProjectModal';
-import Footer from './Footer';
 import { useLocation } from 'react-router-dom';
 
 
@@ -37,8 +39,6 @@ const Projects: React.FC = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  const chatbotImageUrl = "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png";
 
   useEffect(() => {
     document.body.className = isDarkMode ? 'dark-mode' : 'light-mode';
@@ -151,83 +151,7 @@ const Projects: React.FC = () => {
     };
   }, [isDarkMode]);
 
-  const Header = () => {
-    const location = useLocation(); // Get current route path
 
-    return (
-      <header className="header">
-        <div className="header-container">
-          <Link to="/" className="logo-container" style={{ textDecoration: 'none' }}>
-            <Globe className="logo-icon" />
-            <h1 className="logo-text">VisionAid</h1>
-          </Link>
-          <nav className="nav-menu">
-            <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>Home</Link>
-            <Link to="/projects" className={`nav-link ${location.pathname === '/projects' ? 'active' : ''}`}>Projects</Link>
-            <Link to="/about" className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}>About</Link>
-            <Link to="/contact" className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}>Contact</Link>
-          </nav>
-          <button className="mode-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
-            {isDarkMode ? <Sun className="toggle-icon" /> : <Moon className="toggle-icon" />}
-          </button>
-        </div>
-      </header>
-    );
-  };
-
-  const Footer = () => (
-    <footer className="footer">
-      <div className="footer-container">
-        <div className="footer-section">
-          <h3 className="footer-title">VisionAid</h3>
-          <p>Transforming urban infrastructure through intelligent technology.</p>
-          <div className="social-icons">
-            <a
-              href="https://github.com/saksham-jain177/Vision-Aid"
-              className="social-icon"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaGithub />
-            </a>
-            <a href="https://www.linkedin.com/in/saksham-j-95a206225/" className="social-icon" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
-            <a href="#" className="social-icon"><FaTwitter /></a>
-            <a href="#" className="social-icon"><FaInstagram /></a>
-          </div>
-        </div>
-        <div className="footer-section">
-          <h4 className="footer-title">Quick Links</h4>
-          <div className="footer-links">
-            <Link to="/" className="footer-link">Home</Link>
-            <Link to="/projects" className="footer-link">Projects</Link>
-            <Link to="/about" className="footer-link">About</Link>
-            <Link to="/contact" className="footer-link">Contact</Link>
-          </div>
-        </div>
-        <div className="footer-section">
-          <h4 className="footer-title">Contact</h4>
-          <p>Email: 177sakshamjain@gmail.com</p>
-          <p>AI Developer: Saksham Jain</p>
-        </div>
-        <div className="footer-section">
-          <h4 className="footer-title">Newsletter</h4>
-          <div className="newsletter-form">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="newsletter-input"
-            />
-            <button className="newsletter-button">
-              <ArrowRight />
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="footer-bottom">
-        © 2024 VisionAid. All Rights Reserved.
-      </div>
-    </footer>
-  );
 
   const projects: Project[] = [
     {
@@ -449,18 +373,14 @@ const Projects: React.FC = () => {
   return (
     <div className={isDarkMode ? 'dark-mode' : 'light-mode'}>
       <canvas ref={canvasRef} className="canvas-container" />
-      <Header />
+      <Header isDarkMode={isDarkMode} toggleTheme={() => setIsDarkMode(!isDarkMode)} />
 
-      <button
-        className="chatbot-toggle"
-        onClick={() => setIsChatOpen(true)}
-      >
-        <img src={chatbotImageUrl} alt="Chatbot" />
-      </button>
+      <ChatbotToggle isOpen={isChatOpen} onClick={() => setIsChatOpen(!isChatOpen)} />
 
       <Chatbot
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
+        isDarkMode={isDarkMode}
       />
 
       <main className="projects-container">
@@ -514,7 +434,7 @@ const Projects: React.FC = () => {
               Get involved with our projects or suggest new accessibility challenges we can solve together.
             </p>
             <div className="cta-buttons">
-              <button 
+              <button
                 className="cta-button primary"
                 onClick={() => {
                   // Open GitHub contributing guidelines

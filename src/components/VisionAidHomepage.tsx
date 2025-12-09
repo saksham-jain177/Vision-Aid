@@ -5,7 +5,10 @@ import {
 } from 'lucide-react';
 import { FaGithub, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
 import './VisionAidHomepage.css';
-import { Link, useLocation } from 'react-router-dom';
+import Header from './Header';
+import Footer from './Footer';
+import ChatbotToggle from './ChatbotToggle';
+import Chatbot from './Chatbot';
 
 interface VisionAidHomepageProps {
   isDarkMode: boolean;
@@ -15,8 +18,6 @@ interface VisionAidHomepageProps {
 const VisionAidHomepage = ({ isDarkMode, setIsDarkMode }: VisionAidHomepageProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
-
-  const chatbotImageUrl = "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png";
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -197,45 +198,6 @@ const VisionAidHomepage = ({ isDarkMode, setIsDarkMode }: VisionAidHomepageProps
     };
   }, [isDarkMode]);
 
-  const Header = () => {
-    const location = useLocation();
-
-    return (
-      <header className="header">
-        <div className="header-container">
-          <Link to="/" className="logo-container" style={{ textDecoration: 'none' }}>
-            <img
-              src="/logo-final.png"
-              alt="VisionAid Logo"
-              className="logo-icon"
-              style={{
-                width: '100px',
-                height: '100px',
-                position: 'absolute',
-                top: '50%',
-                left: '-10px',
-                transform: 'translateY(-50%)',
-                zIndex: 10
-              }}
-            />
-            <h1 className="logo-text">VisionAid</h1>
-          </Link>
-          <nav className="nav-menu">
-            <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>Home</Link>
-            <Link to="/projects" className={`nav-link ${location.pathname === '/projects' ? 'active' : ''}`}>Projects</Link>
-            <Link to="/about" className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}>About</Link>
-            <Link to="/contact" className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}>Contact</Link>
-          </nav>
-          <button
-            className="mode-toggle"
-            onClick={() => setIsDarkMode(!isDarkMode)}
-          >
-            {isDarkMode ? <Sun className="toggle-icon" /> : <Moon className="toggle-icon" />}
-          </button>
-        </div>
-      </header>
-    );
-  };
 
 
   const KeyFeatures = () => {
@@ -318,64 +280,18 @@ const VisionAidHomepage = ({ isDarkMode, setIsDarkMode }: VisionAidHomepageProps
     );
   };
 
-  const Footer = () => (
-    <footer className="footer">
-      <div className="footer-container">
-        <div className="footer-section">
-          <h3 className="footer-title">VisionAid</h3>
-          <p>Transforming urban infrastructure through intelligent technology.</p>
-          <div className="social-icons">
-            <a
-              href="https://github.com/saksham-jain177/Vision-Aid"
-              className="social-icon"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaGithub />
-            </a>
-            <a href="https://www.linkedin.com/in/saksham-j-95a206225/" className="social-icon" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
-            <a href="#" className="social-icon"><FaTwitter /></a>
-            <a href="#" className="social-icon"><FaInstagram /></a>
-          </div>
-        </div>
-        <div className="footer-section">
-          <h4 className="footer-title">Quick Links</h4>
-          <div className="footer-links">
-            <Link to="/" className="footer-link">Home</Link>
-            <Link to="/projects" className="footer-link">Projects</Link>
-            <Link to="/about" className="footer-link">About</Link>
-            <Link to="/contact" className="footer-link">Contact</Link>
-          </div>
-        </div>
-        <div className="footer-section">
-          <h4 className="footer-title">Contact</h4>
-          <p>Email: 177sakshamjain@gmail.com</p>
-          <p>AI Developer: Saksham Jain</p>
-        </div>
-        <div className="footer-section">
-          <h4 className="footer-title">Newsletter</h4>
-          <div className="newsletter-form">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="newsletter-input"
-            />
-            <button className="newsletter-button">
-              <ArrowRight />
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="footer-bottom">
-        © 2024 VisionAid. All Rights Reserved.
-      </div>
-    </footer>
-  );
 
   return (
     <div className={isDarkMode ? 'dark-mode' : 'light-mode'}>
       <canvas ref={canvasRef} className="canvas-container" />
-      <Header />
+      <Header isDarkMode={isDarkMode} toggleTheme={() => setIsDarkMode(!isDarkMode)} />
+
+      <ChatbotToggle isOpen={isChatOpen} onClick={() => setIsChatOpen(!isChatOpen)} />
+      <Chatbot
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        isDarkMode={isDarkMode}
+      />
 
       <main className="main-content">
         <section>

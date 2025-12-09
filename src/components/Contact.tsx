@@ -5,8 +5,13 @@ import { Link } from 'react-router-dom';
 import { Globe, Sun, Moon, MessageCircle, X, Send, ArrowRight } from 'lucide-react';
 import './Contact.css';
 import Chatbot from './Chatbot';
+import ChatbotToggle from './ChatbotToggle';
+import Header from './Header';
+import Footer from './Footer';
 import { useLocation } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
+import { sanitizeInput, validateEmail, validateMessageLength } from '../utils/sanitize';
+import { contactRateLimiter, getSessionId } from '../utils/rateLimit';
 
 const Contact: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -22,8 +27,6 @@ const Contact: React.FC = () => {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const inputRef = useRef<HTMLInputElement | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  
-  const chatbotImageUrl = "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png";
 
   useEffect(() => {
     if (isChatOpen && inputRef.current) {
@@ -60,30 +63,62 @@ const Contact: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formRef.current) return;
-    
+
+    // Security: Validate inputs
+    const sanitizedName = sanitizeInput(formData.name);
+    const sanitizedSubject = sanitizeInput(formData.subject);
+    const sanitizedMessage = sanitizeInput(formData.message);
+
+    if (!sanitizedName || sanitizedName.length < 2) {
+      setSubmitStatus('error');
+      alert('Please enter a valid name (minimum 2 characters)');
+      return;
+    }
+
+    if (!validateEmail(formData.email)) {
+      setSubmitStatus('error');
+      alert('Please enter a valid email address');
+      return;
+    }
+
+    if (!validateMessageLength(sanitizedMessage, 2000)) {
+      setSubmitStatus('error');
+      alert('Message must be between 1 and 2000 characters');
+      return;
+    }
+
+    // Security: Rate limiting (3 submissions per 5 minutes)
+    const sessionId = getSessionId();
+    if (!contactRateLimiter.canMakeRequest(sessionId, 3, 300000)) {
+      setSubmitStatus('error');
+      const waitTime = Math.ceil(contactRateLimiter.getTimeUntilReset(sessionId, 300000) / 60);
+      alert(`⏱️ Please wait ${waitTime} minutes before submitting again`);
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitStatus('idle');
-    
+
     try {
       const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
       const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
       const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-      
+
       if (!serviceId || !templateId || !publicKey) {
         throw new Error('EmailJS credentials not configured');
       }
-      
+
       await emailjs.sendForm(
         serviceId,
         templateId,
         formRef.current,
         publicKey
       );
-      
+
       setSubmitStatus('success');
-      
+
       // Reset form after successful submission
       setFormData({
         name: '',
@@ -91,14 +126,14 @@ const Contact: React.FC = () => {
         subject: '',
         message: ''
       });
-      
+
       // Clear success message after 5 seconds
       setTimeout(() => setSubmitStatus('idle'), 5000);
     } catch (error) {
       console.error('Email send failed:', error);
       setSubmitStatus('error');
-      
-      // Fallback to mailto if EmailJS fails
+
+      // Fallback to mailto if EmailJS fails (don't expose internal error details to user)
       const subject = encodeURIComponent(formData.subject);
       const body = encodeURIComponent(
         `Name: ${formData.name}\n` +
@@ -106,7 +141,7 @@ const Contact: React.FC = () => {
         `Message:\n${formData.message}`
       );
       window.open(`mailto:177sakshamjain@gmail.com?subject=${subject}&body=${body}`);
-      
+
       // Clear error message after 5 seconds
       setTimeout(() => setSubmitStatus('idle'), 5000);
     } finally {
@@ -114,89 +149,13 @@ const Contact: React.FC = () => {
     }
   };
 
-  const Header = () => {
-    const location = useLocation(); // Get current route path
-  
-    return (
-      <header className="header">
-        <div className="header-container">
-          <Link to="/" className="logo-container" style={{ textDecoration: 'none' }}>
-            <Globe className="logo-icon" />
-            <h1 className="logo-text">VisionAid</h1>
-          </Link>
-          <nav className="nav-menu">
-            <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>Home</Link>
-            <Link to="/projects" className={`nav-link ${location.pathname === '/projects' ? 'active' : ''}`}>Projects</Link>
-            <Link to="/about" className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}>About</Link>
-            <Link to="/contact" className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}>Contact</Link>
-          </nav>
-          <button className="mode-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
-            {isDarkMode ? <Sun className="toggle-icon" /> : <Moon className="toggle-icon" />}
-          </button>
-        </div>
-      </header>
-    );
-  };
 
-  const Footer = () => (
-    <footer className="footer">
-      <div className="footer-container">
-        <div className="footer-section">
-          <h3 className="footer-title">VisionAid</h3>
-          <p>Transforming urban infrastructure through intelligent technology.</p>
-          <div className="social-icons">
-            <a 
-              href="https://github.com/saksham-jain177/Vision-Aid" 
-              className="social-icon"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaGithub />
-            </a>
-            <a href="https://www.linkedin.com/in/saksham-j-95a206225/" className="social-icon" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
-            <a href="#" className="social-icon"><FaTwitter /></a>
-            <a href="#" className="social-icon"><FaInstagram /></a>
-          </div>
-        </div>
-        <div className="footer-section">
-          <h4 className="footer-title">Quick Links</h4>
-          <div className="footer-links">
-            <Link to="/" className="footer-link">Home</Link>
-            <Link to="/projects" className="footer-link">Projects</Link>
-            <Link to="/about" className="footer-link">About</Link>
-            <Link to="/contact" className="footer-link">Contact</Link>
-          </div>
-        </div>
-        <div className="footer-section">
-          <h4 className="footer-title">Contact</h4>
-          <p>Email: 177sakshamjain@gmail.com</p>
-          <p>AI Developer: Saksham Jain</p>
-        </div>
-        <div className="footer-section">
-          <h4 className="footer-title">Newsletter</h4>
-          <div className="newsletter-form">
-            <input 
-              type="email" 
-              placeholder="Enter your email"
-              className="newsletter-input"
-            />
-            <button className="newsletter-button">
-              <ArrowRight />
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="footer-bottom">
-        © 2025 VisionAid. All Rights Reserved.
-      </div>
-    </footer>
-  );
 
   return (
     <div className={isDarkMode ? 'dark-mode' : 'light-mode'}>
       <div className="contact-container">
-        <Header />
-        
+        <Header isDarkMode={isDarkMode} toggleTheme={() => setIsDarkMode(!isDarkMode)} />
+
         <button
           className="mode-toggle"
           onClick={() => setIsDarkMode(!isDarkMode)}
@@ -204,20 +163,16 @@ const Contact: React.FC = () => {
           {isDarkMode ? <Sun className="toggle-icon" /> : <Moon className="toggle-icon" />}
         </button>
 
-        <button
-          className="chatbot-toggle"
-          onClick={() => setIsChatOpen(!isChatOpen)}
-        >
-          <img src={chatbotImageUrl} alt="Chatbot" />
-        </button>
-        
+        <ChatbotToggle isOpen={isChatOpen} onClick={() => setIsChatOpen(!isChatOpen)} />
+
         <Chatbot
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
+          isDarkMode={isDarkMode}
         />
 
         {/* Hero Section */}
-        <motion.section 
+        <motion.section
           className="contact-hero"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -283,7 +238,7 @@ const Contact: React.FC = () => {
         </section>
 
         {/* Contact Form Section */}
-        <motion.section 
+        <motion.section
           className="contact-form-section"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -291,34 +246,34 @@ const Contact: React.FC = () => {
           transition={{ duration: 0.7, delay: 0.2 }}
         >
           <h2 className="contact-form-title">Send us a message</h2>
-          
+
           {/* Status Messages */}
           {submitStatus === 'success' && (
-            <div style={{ 
-              padding: '1rem', 
-              marginBottom: '1rem', 
-              backgroundColor: '#10b981', 
-              color: 'white', 
+            <div style={{
+              padding: '1rem',
+              marginBottom: '1rem',
+              backgroundColor: '#10b981',
+              color: 'white',
               borderRadius: '8px',
               textAlign: 'center'
             }}>
               ✅ Message sent successfully! We'll get back to you soon.
             </div>
           )}
-          
+
           {submitStatus === 'error' && (
-            <div style={{ 
-              padding: '1rem', 
-              marginBottom: '1rem', 
-              backgroundColor: '#ef4444', 
-              color: 'white', 
+            <div style={{
+              padding: '1rem',
+              marginBottom: '1rem',
+              backgroundColor: '#ef4444',
+              color: 'white',
               borderRadius: '8px',
               textAlign: 'center'
             }}>
               ⚠️ Failed to send. Opening email client as fallback...
             </div>
           )}
-          
+
           <form ref={formRef} onSubmit={handleSubmit} className="contact-form">
             <div className="form-group">
               <motion.input
@@ -375,18 +330,18 @@ const Contact: React.FC = () => {
               {isSubmitting ? 'Sending...' : 'Send Message'}
               <Send className="send-icon" size={18} />
             </motion.button>
-            {(!import.meta.env.VITE_EMAILJS_SERVICE_ID || 
-              !import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 
+            {(!import.meta.env.VITE_EMAILJS_SERVICE_ID ||
+              !import.meta.env.VITE_EMAILJS_TEMPLATE_ID ||
               !import.meta.env.VITE_EMAILJS_PUBLIC_KEY) && (
-              <p style={{ 
-                marginTop: '1rem', 
-                fontSize: '0.85rem', 
-                color: 'var(--text-secondary)',
-                textAlign: 'center'
-              }}>
-                💡 Note: EmailJS not configured. Using mailto fallback.
-              </p>
-            )}
+                <p style={{
+                  marginTop: '1rem',
+                  fontSize: '0.85rem',
+                  color: 'var(--text-secondary)',
+                  textAlign: 'center'
+                }}>
+                  💡 Note: EmailJS not configured. Using mailto fallback.
+                </p>
+              )}
           </form>
         </motion.section>
 
