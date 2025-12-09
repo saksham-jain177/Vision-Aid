@@ -1,15 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaUsers, FaLightbulb, FaHandHoldingHeart, FaEye, FaGithub, FaLinkedin, FaTwitter, FaInstagram, FaRocket, FaFlask, FaCogs, FaCheckCircle } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
-import { Globe, Sun, Moon, ArrowRight, Lightbulb, Beaker, Code, Target } from 'lucide-react';
+import { FaUsers, FaLightbulb, FaHandHoldingHeart, FaEye, FaCogs, FaCheckCircle } from 'react-icons/fa';
+import { Sun, Moon, Lightbulb, Beaker, Code, Target } from 'lucide-react';
 import './About.css';
 import './ImpactSection.css';
 import Chatbot from './Chatbot';
 import ChatbotToggle from './ChatbotToggle';
 import Header from './Header';
 import Footer from './Footer';
-import { useLocation } from 'react-router-dom';
 
 const About: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -204,7 +202,7 @@ const About: React.FC = () => {
                   <h3>💡 Project Inception</h3>
                   <p>AI-driven traffic and security solutions</p>
                 </div>
-                <div className="timeline-dot"></div>
+
               </motion.div>
             </motion.div>
 
@@ -229,7 +227,7 @@ const About: React.FC = () => {
                   <h3>🔬 Research & Development</h3>
                   <p>Testing innovative accessibility solutions</p>
                 </div>
-                <div className="timeline-dot"></div>
+
               </motion.div>
             </motion.div>
 
@@ -254,7 +252,7 @@ const About: React.FC = () => {
                   <h3>⚙️ Implementation</h3>
                   <p>Building & refining accessibility tools</p>
                 </div>
-                <div className="timeline-dot"></div>
+
               </motion.div>
             </motion.div>
 
@@ -279,7 +277,7 @@ const About: React.FC = () => {
                   <h3>🚀 Future Vision</h3>
                   <p>Cloud integration & smart city collaboration</p>
                 </div>
-                <div className="timeline-dot"></div>
+
               </motion.div>
             </motion.div>
           </div>

@@ -143,17 +143,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose, processedFaces, m
   }, [refreshKey]);
 
   // Calculate statistics based on real data
-  // Log the data we're receiving
-  console.log('Dashboard received matchHistory:', matchHistory);
-  console.log('Dashboard received processedFaces:', processedFaces);
-  console.log('Dashboard received referenceImagesCount:', referenceImagesCount);
 
-  // Simple calculations to ensure we have data
-  const totalSearches = Array.isArray(matchHistory) ? matchHistory.length : 0;
-
-  // Count matches where distance is less than threshold (0.6)
-  const matchesFound = Array.isArray(matchHistory)
-    ? matchHistory.filter(match => match && match.distance < 0.6).length
+  // Calculate derived stats
+  const totalSearches = processedFaces ? processedFaces.length : 0;
+  const matchesFound = Array.isArray(matchHistory) 
+    ? matchHistory.filter(match => match && typeof match.distance === 'number' && match.distance < 0.6).length 
     : 0;
 
   // Calculate average confidence - only for positive matches

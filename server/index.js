@@ -33,7 +33,7 @@ if (!OPENROUTER_API_KEY) {
     process.exit(1);
 }
 
-console.log('🔑 API Key loaded successfully');
+// console.log('🔑 API Key loaded successfully');
 
 app.post('/api/chat', async (req, res) => {
     try {
@@ -89,8 +89,8 @@ app.post('/api/chat', async (req, res) => {
 });
 
 const server = app.listen(PORT, () => {
-    console.log(`✅ Proxy server running on http://localhost:${PORT}`);
-    console.log('🔄 Server is ready to accept connections...');
+    // console.log(`✅ Proxy server running on http://localhost:${PORT}`);
+    // console.log('🔄 Server is ready to accept connections...');
 });
 
 server.on('error', (error) => {

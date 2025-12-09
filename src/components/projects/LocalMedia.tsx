@@ -274,19 +274,6 @@ const LocalMedia: React.FC<LocalMediaProps> = ({ faceMatcher, onClose, matchThre
     setIsPlaying(false);
   };
 
-  // Start processing when video is loaded
-  useEffect(() => {
-    if (isVideoLoaded && videoRef.current && isPlaying) {
-      requestAnimationFrame(processVideoFrame);
-    }
-  }, [isVideoLoaded, isPlaying]);
-
-  const handleVideoTimeUpdate = () => {
-    if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
-    }
-  };
-
   const handleVideoLoaded = () => {
     if (videoRef.current) {
       setDuration(videoRef.current.duration);

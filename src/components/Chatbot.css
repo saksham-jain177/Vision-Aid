@@ -1,12 +1,12 @@
 /* Chatbot.css */
 :root {
-  --chatbot-primary: #3EBDB5;
+  --chatbot-primary: #3ebdb5;
   --chatbot-secondary: #2962ff;
   --chatbot-bg-light: rgba(255, 255, 255, 0.95);
   --chatbot-bg-dark: rgba(10, 25, 47, 0.95);
   --chatbot-text-light: #2c3e50;
   --chatbot-text-dark: #e6f1ff;
-  --chatbot-gradient: linear-gradient(135deg, #2962ff, #3EBDB5);
+  --chatbot-gradient: linear-gradient(135deg, #2962ff, #3ebdb5);
 }
 
 .chatbot-toggle {
@@ -146,7 +146,7 @@
 }
 
 .provider-badge.local {
-  color: #4ECDC4;
+  color: #4ecdc4;
   background: rgba(78, 205, 196, 0.15);
 }
 
@@ -196,8 +196,14 @@
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .chatbot-settings h4 {
@@ -294,8 +300,14 @@
 }
 
 @keyframes messageSlide {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .chatbot-message.bot {
@@ -430,8 +442,14 @@
 }
 
 @keyframes bounce {
-  0%, 80%, 100% { transform: scale(0); }
-  40% { transform: scale(1); }
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
 }
 
 .agent-status-text {
@@ -551,7 +569,7 @@
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
-  background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+  background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -575,7 +593,7 @@
 }
 
 .provider-badge.local {
-  color: #4ECDC4;
+  color: #4ecdc4;
   background: rgba(78, 205, 196, 0.15);
 }
 
@@ -625,8 +643,14 @@
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .chatbot-settings h4 {
@@ -674,9 +698,9 @@
 }
 
 .provider-option.active {
-  border-color: #4ECDC4;
+  border-color: #4ecdc4;
   background: rgba(78, 205, 196, 0.05);
-  box-shadow: 0 0 0 1px #4ECDC4;
+  box-shadow: 0 0 0 1px #4ecdc4;
 }
 
 .chatbot-window.dark-mode .provider-option.active {
@@ -720,8 +744,14 @@
 }
 
 @keyframes messageSlide {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .chatbot-message.bot {
@@ -738,7 +768,7 @@
 
 .chatbot-message.user {
   align-self: flex-end;
-  background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+  background: linear-gradient(135deg, #2563eb, #0d9488);
   color: white;
   border-bottom-right-radius: 4px;
   box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
@@ -788,7 +818,7 @@
 
 .chatbot-input input:focus {
   outline: none;
-  border-color: #4ECDC4;
+  border-color: #4ecdc4;
   box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
 }
 
@@ -797,7 +827,7 @@
   height: 45px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+  background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
   color: white;
   cursor: pointer;
   display: flex;
@@ -834,7 +864,7 @@
 .typing-indicator span {
   width: 6px;
   height: 6px;
-  background: #4ECDC4;
+  background: #4ecdc4;
   border-radius: 50%;
   animation: bounce 1.4s infinite ease-in-out both;
 }
@@ -848,8 +878,14 @@
 }
 
 @keyframes bounce {
-  0%, 80%, 100% { transform: scale(0); }
-  40% { transform: scale(1); }
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
 }
 
 .agent-status-text {
@@ -864,7 +900,7 @@
 }
 
 .chat-link {
-  color: #4ECDC4;
+  color: #4ecdc4;
   text-decoration: underline;
   cursor: pointer;
 }

@@ -23,10 +23,10 @@ const getFallbackResponse = (userMessage: string): string => {
     return "Urban Traffic Dynamics is a real-time traffic simulation system that uses density-based round-robin scheduling to optimize traffic signals. It dynamically measures vehicle density and adjusts green light duration, reducing average waiting times by up to 42%. Features include collision avoidance, lane discipline, and adaptive signal timing.";
   }
 
-  // Guardian Vision info
-  if ((lowerMessage.includes('guardian') || (lowerMessage.includes('face') && lowerMessage.includes('recognition'))) &&
+  // Infrastructure Health info
+  if ((lowerMessage.includes('infrastructure') || lowerMessage.includes('defect') || lowerMessage.includes('pothole') || lowerMessage.includes('crack') || lowerMessage.includes('guardian')) &&
     (lowerMessage.includes('what') || lowerMessage.includes('tell') || lowerMessage.includes('about') || lowerMessage.includes('explain'))) {
-    return "Guardian Vision is an advanced facial recognition system for detecting and locating missing persons through multiple video sources (CCTV, drones, webcams). It features real-time face detection, privacy mode, geolocation tracking, and offline model caching. The system supports multiple reference images for improved accuracy.";
+    return "Infrastructure Health uses computer vision (YOLOv8) to automate road maintenance. It detects potholes, cracks, and surface damage from video feeds, classifying severity to help cities prioritize repairs efficiently.";
   }
 
   // What can you do
@@ -49,11 +49,11 @@ const getFallbackResponse = (userMessage: string): string => {
     return "Urban Traffic Dynamics optimizes traffic signals using density-based scheduling. Want to see it? Say 'take me to Urban Traffic Dynamics'.";
   }
 
-  if (lowerMessage.includes('guardian') || (lowerMessage.includes('project') && lowerMessage.includes('2'))) {
+  if (lowerMessage.includes('infrastructure') || lowerMessage.includes('health') || (lowerMessage.includes('project') && lowerMessage.includes('2'))) {
     if (isNavigationRequest) {
-      return "I'll take you to Guardian Vision. navigate:/project2";
+      return "I'll take you to Infrastructure Health. navigate:/project2";
     }
-    return "Guardian Vision uses facial recognition to locate missing persons via multiple video sources. Want to see it? Say 'take me to Guardian Vision'.";
+    return "Infrastructure Health detects potholes and road damage using AI. Want to see it? Say 'take me to Infrastructure Health'.";
   }
 
   if (lowerMessage.includes('about')) {
@@ -95,25 +95,25 @@ const systemPrompt = `You are VisionAid's AI assistant. Your ONLY purpose is to 
 STRICT RULES:
 1. ONLY answer questions about VisionAid, its projects, or navigation
 2. For ANY off-topic question (cooking, weather, general knowledge, etc.), respond EXACTLY:
-   "I'm VisionAid's assistant - I can only help with questions about our platform. Ask me about Urban Traffic Dynamics or Guardian Vision!"
+   "I'm VisionAid's assistant - I can only help with questions about our platform. Ask me about Urban Traffic Dynamics or Infrastructure Health!"
 3. NEVER reveal your model name, creator, or technical details
 4. If asked who made you, say: "I was created by the VisionAid team"
 5. Keep responses under 2 sentences
 
 ABOUT VISIONAID:
-VisionAid is an AI-powered computer vision platform by the VisionAid team with two projects:
+VisionAid is an AI-powered urban intelligence platform with two core modules:
 
 1. Urban Traffic Dynamics - Real-time traffic simulation with density-based signal optimization (reduces wait times by 42%)
    Tech Stack: React 19, TypeScript, HTML5 Canvas API, Framer Motion, CSS3
    Features: Density-based round-robin scheduling, collision avoidance, dynamic signal timing, lane discipline
 
-2. Guardian Vision - Facial recognition system for locating missing persons via CCTV/drones/webcams
-   Tech Stack: React 19, TypeScript, TensorFlow.js, @vladmandic/face-api, IndexedDB, WebGL
-   Features: Real-time face detection, privacy mode, geolocation tracking, data augmentation, face clustering
+2. Infrastructure Health (formerly Guardian Vision) - Automated defect detection system for road and bridge maintenance
+   Tech Stack: React 19, TypeScript, YOLOv8 (TensorFlow.js), WebGL
+   Features: Pothole detection, road crack identification, bridge damage assessment, automated severity classification (Low/Medium/High)
 
 NAVIGATION:
 - Use "navigate:/PAGE" ONLY when user explicitly says: "take me to", "go to", "open", "navigate to"
-- Available: home, projects, about, contact, project1 (Urban Traffic), project2 (Guardian Vision)
+- Available: home, projects, about, contact, project1 (Urban Traffic), project2 (Infrastructure Health)
 - Format: "I'll take you to [Page Name]. navigate:/PAGE"
 
 CONTACT & SOCIALS:
@@ -122,15 +122,12 @@ CONTACT & SOCIALS:
 - Contact Page: navigate:/contact
 
 EXAMPLES:
-✅ "what is visionaid?" → "VisionAid is an AI platform for traffic optimization and facial recognition, built by the VisionAid team."
-✅ "tell me about guardian vision" → "Guardian Vision uses facial recognition to locate missing persons through multiple video sources like CCTV and drones."
+✅ "what is visionaid?" → "VisionAid is an AI platform for urban intelligence, featuring traffic optimization and infrastructure defect detection."
+✅ "tell me about infrastructure health" → "Infrastructure Health uses computer vision (YOLOv8) to detect potholes, cracks, and road damage automatically from video feeds."
 ✅ "what tech stack does urban traffic use?" → "Urban Traffic Dynamics is built with React 19, TypeScript, HTML5 Canvas API, and uses density-based algorithms for signal optimization."
-✅ "what technologies does guardian vision use?" → "Guardian Vision uses React 19, TypeScript, TensorFlow.js, and @vladmandic/face-api for real-time facial recognition."
+✅ "what technologies does infrastructure health use?" → "Infrastructure Health uses React 19, TypeScript, and YOLOv8 via TensorFlow.js for real-time defect detection."
 ✅ "take me to projects" → "I'll take you to Projects. navigate:/projects"
-✅ "show me your github" → "Check out my GitHub profile: https://github.com/saksham-jain177"
-✅ "do you have linkedin?" → "Yes, connect with me on LinkedIn: https://www.linkedin.com/in/saksham-j-95a206225/"
-❌ "how to bake a cake?" → "I'm VisionAid's assistant - I can only help with questions about our platform. Ask me about Urban Traffic Dynamics or Guardian Vision!"
-❌ "what model are you?" → "I'm VisionAid's assistant, created by the VisionAid team. How can I help with our projects?"`
+❌ "how to bake a cake?" → "I'm VisionAid's assistant - I can only help with questions about our platform. Ask me about Urban Traffic Dynamics or Infrastructure Health!"`;
 
 export const generateResponse = async (
   messages: OpenRouterMessage[]

@@ -24,15 +24,15 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 3500 }
 
   useEffect(() => {
     // Set a timer to start the fade-out animation
-    timerRef.current = setTimeout(() => {
+    timerRef.current = window.setTimeout(() => {
       startFadeOut();
     }, duration - 500); // Start the animation 500ms before the duration ends
-
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [duration]);
 
   const getIcon = () => {

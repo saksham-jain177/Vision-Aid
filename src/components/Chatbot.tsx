@@ -62,31 +62,9 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, isDarkMode }) => {
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    const handleSlashKey = (event: KeyboardEvent) => {
-      if (event.key === '/' && document.activeElement !== inputRef.current) {
-        event.preventDefault();
-        if (!isOpen) {
-          onClose();
-        }
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleSlashKey);
-    return () => {
-      window.removeEventListener('keydown', handleSlashKey);
-    };
-  }, [isOpen, onClose]);
 
   const onCloseWithAnimation = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsClosing(false);
-      onClose();
-    }, 500);
+    onClose();
   };
 
   useEffect(() => {
@@ -142,7 +120,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, onClose, isDarkMode }) => {
           navigate(finalRoute);
         } else {
           setMessages(prev => [...prev, {
-            text: "I'm not sure about that page. Available pages are: Home, Projects (including Urban Traffic Dynamics and Guardian Vision), About, and Contact.",
+            text: "I'm not sure about that page. Available pages are: Home, Projects (including Urban Traffic Dynamics and Infrastructure Health), About, and Contact.",
             sender: 'bot',
             timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
           }]);

@@ -52,7 +52,7 @@ const VisionAidHomepage = ({ isDarkMode, setIsDarkMode }: VisionAidHomepageProps
 
     const cubes: CubeObject[] = [];
 
-    const cubeCount = 50;
+    const cubeCount = 30;
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshPhongMaterial({
       color: isDarkMode ? 0x4a90e2 : 0x2c5282,

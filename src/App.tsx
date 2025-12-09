@@ -7,17 +7,34 @@ import UrbanTrafficDynamics from './components/projects/UrbanTrafficDynamics';
 import GuardianVision from './components/projects/GuardianVision';
 import ScrollToTop from './components/ScrollToTop';
 import './App.css';
-
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Chatbot from './components/Chatbot';
 import ChatbotToggle from './components/ChatbotToggle';
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
 
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Check localStorage first
+    const savedMode = localStorage.getItem('visionAid_theme');
+    if (savedMode) {
+      return savedMode === 'dark';
+    }
+    // Fallback to system preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  // Apply theme to body
   useEffect(() => {
-    document.body.className = isDarkMode ? 'dark-mode' : 'light-mode';
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+      document.body.classList.remove('light-mode');
+      localStorage.setItem('visionAid_theme', 'dark');
+    } else {
+      document.body.classList.add('light-mode');
+      document.body.classList.remove('dark-mode');
+      localStorage.setItem('visionAid_theme', 'light');
+    }
   }, [isDarkMode]);
 
   // Global keyboard shortcut for opening chat
